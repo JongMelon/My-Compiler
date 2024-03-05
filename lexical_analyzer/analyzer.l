@@ -17,9 +17,9 @@ binary_digit [01]
 hex_digit [0-9a-fA-F]
 octal_digit [0-7]
 
-binary_num (0[b])?{binary_digit}+
+binary_num (0[b]){binary_digit}+
 octal_num ^(0){octal_digit}+$
-hex_num (0[xX])?{hex_digit}+
+hex_num (0[xX]){hex_digit}+
 
 id (\_)*{letter}(\_)*({letter}|{digit})*
 
