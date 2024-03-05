@@ -149,13 +149,8 @@ comment_block \/\*([^*]|\*[^/])*\*\/
 
 int main(int argc, char *argv[]) {
     for (int i = 1; i <= 6; i++) {
-        char file[6];
+        char file[6] = "0.sy";
         file[0] = '0' + i;
-        file[1] = '.';
-        file[2] = 's';
-        file[3] = 'y';
-        file[4] = 0;
-        file[5] = 0;
         freopen(file, "r", stdin);
         file[2] = 't';
         file[3] = 'x';
