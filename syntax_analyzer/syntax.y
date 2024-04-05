@@ -1,28 +1,53 @@
 %{
 
 #include <stdio.h>
+#include <string>
 
 int yylex(void);
 void yyerror(const char *s);
 
 %}
 
+%union {
+    int ival;
+    char chval;
+    std::string sval;
+}
+
 %start CompUnit
 
-%token CONST VALTPYE INTCONST IF ELSE WHILE BREAK CONTINUE RETURN LEFTSQB RIGHTSQB LPAREN RPAREN LEFTBRACE RIGHTBRACE IDENT
-%token '+' '-' '*' '/' '%' '<' '>' LE GE EQ NE LOR LAND '!' ',' ';' '='
+%token <sval>CONST INT IF ELSE WHILE BREAK CONTINUE RETURN IDENT VOID
+%token <ival>INTCONST
+%token <chval>LEFTSQB RIGHTSQB LPAREN RPAREN LEFTBRACE RIGHTBRACE
+%token <chval>'+' '-' '*' '/' '%' '<' '>' '!' ',' ';' '='
+%token <sval>LE GE EQ NE LOR LAND
 
-%type Decl ConstDecl VarDecl ConstDef ConstDefList VarDef VarDefList ConstInitVal InitVal ConstInitValList InitValList
-%type Exp ExpList ExpSQBList ConstExp ConstExpSQBList AddExp LOrExp PrimaryExp UnaryExp UnaryOp MulExp RelExp EqExp LAndExp
-%type FuncDef FuncType FuncFParam FuncFParams FuncFParamList FuncRParams
-%type Block BlockItem BlockItemList Stmt LVal Cond
+%type <sval>Decl ConstDecl VarDecl ConstDef ConstDefList VarDef VarDefList ConstInitVal InitVal ConstInitValList InitValList
+%type <sval>Exp ExpSQBList ConstExp ConstExpSQBList AddExp LOrExp PrimaryExp UnaryExp UnaryOp MulExp RelExp EqExp LAndExp
+%type <sval>FuncDef FuncType FuncFParam FuncFParams FuncRParams
+%type <sval>Block BlockItem BlockItemList Stmt LVal Cond
+
+%type <sval>CompList DecOrDef VarType
+
+%left LOR
+%left LAND
+%left EQ NE
+%left '<' '>' LE GE
+%left '+' '-'
+%left '*' '/' '%'
+%right '!'
 
 %%
 
 CompUnit
-: CompUnit Decl {}
-| Decl {}
-| CompUnit FuncDef {}
+: CompList {}
+
+CompList
+: DecOrDef {}
+| CompList DecOrDef {}
+
+DecOrDef
+: Decl {}
 | FuncDef {}
 
 Decl
@@ -30,76 +55,81 @@ Decl
 | VarDecl {}
 
 ConstDecl
-: CONST VALTPYE ConstDef ConstDefList ';' {}
+: CONST VarType ConstDefList ';' {}
 
 ConstDefList
-: ConstDefList ',' ConstDef {}
-| /*empty*/ {}
+: ConstDef {}
+| ConstDef ',' ConstDefList {}
 
 ConstDef
-: IDENT ConstExpSQBList '=' ConstInitVal {}
+: IDENT '=' ConstInitVal {}
+| IDENT ConstExpSQBList '=' InitVal {}
 
 ConstInitVal
 : ConstExp {}
 | LEFTBRACE RIGHTBRACE {}
-| LEFTBRACE ConstInitVal ConstInitValList RIGHTBRACE {}
+| LEFTBRACE ConstInitValList RIGHTBRACE {}
 
 ConstInitValList
-: ConstInitValList ',' ConstInitVal {}
-| /*empty*/ {}
+: ConstInitVal {}
+| ConstInitValList ',' ConstInitVal {}
 
 VarDecl
-: VALTPYE VarDef VarDefList ';' {}
+: FuncType VarDefList ';' {}
 
 VarDefList
-: VarDefList ',' VarDef {}
-| /*empty*/ {}
+: VarDef {}
+| VarDef ',' VarDefList {}
 
 VarDef
-: IDENT ConstExpSQBList {}
+: IDENT {}
+| IDENT '=' InitVal {}
+| IDENT ConstExpSQBList {}
 | IDENT ConstExpSQBList '=' InitVal {}
 
 ConstExpSQBList
-: ConstExpSQBList LEFTSQB ConstExp RIGHTSQB {}
-| /*empty*/ {}
+: LEFTSQB ConstExp RIGHTSQB {}
+| ConstExpSQBList LEFTSQB ConstExp RIGHTSQB {}
 
 InitVal
 : Exp {}
 | LEFTBRACE RIGHTBRACE {}
-| LEFTBRACE InitVal InitValList RIGHTBRACE {}
+| LEFTBRACE InitValList RIGHTBRACE {}
 
 InitValList
-: InitValList ',' InitVal {}
-| /*empty*/ {}
+: InitVal {}
+| InitValList ',' InitVal {}
 
 FuncDef
 : FuncType IDENT LPAREN RPAREN Block {}
 | FuncType IDENT LPAREN FuncFParams RPAREN Block {}
 
+VarType
+: INT {}
+
 FuncType
-: 'void' {}
-| VALTPYE {}
+: VOID {}
+| INT {}
 
 FuncFParams
-: FuncFParam FuncFParamList {}
+: FuncFParam {}
+| FuncFParam ',' FuncFParams {}
 
-FuncFParamList
-: ',' FuncFParam {}
-| /*empty*/ {}
 
 FuncFParam
-: VALTPYE IDENT {}
-| VALTPYE IDENT LEFTSQB RIGHTSQB ExpSQBList {}
+: VarType IDENT {}
+| VarType IDENT LEFTSQB RIGHTSQB {}
+| VarType IDENT LEFTSQB RIGHTSQB ExpSQBList {}
 
 ExpSQBList
-: ExpSQBList LEFTSQB Exp RIGHTSQB {}
-| /*empty*/ {}
+: LEFTSQB Exp RIGHTSQB {}
+| ExpSQBList LEFTSQB Exp RIGHTSQB {}
 
 Block
 : LEFTBRACE BlockItemList RIGHTBRACE {}
 
 BlockItemList
-: BlockItemList BlockItem {}
+: BlockItem BlockItemList {}
 | /*empty*/ {}
 
 BlockItem
@@ -119,6 +149,9 @@ Stmt
 | RETURN ';' {}
 | RETURN Exp ';' {}
 
+ConstExp
+: Exp {}
+
 Exp
 : AddExp {}
 
@@ -126,7 +159,8 @@ Cond
 : LOrExp {}
 
 LVal
-: IDENT ExpSQBList {}
+: IDENT {}
+| IDENT ExpSQBList {}
 
 PrimaryExp
 : LPAREN Exp RPAREN {}
@@ -145,11 +179,8 @@ UnaryOp
 | '!' {}
 
 FuncRParams
-: Exp ExpList {}
-
-ExpList
-: ExpList ',' Exp {}
-| /*empty*/ {}
+: Exp {}
+| Exp ',' FuncRParams {}
 
 MulExp
 : UnaryExp {}
@@ -182,7 +213,5 @@ LOrExp
 : LAndExp {}
 | LOrExp LOR LAndExp {}
 
-ConstExp
-: AddExp {}
 
 %%
