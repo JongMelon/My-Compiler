@@ -63,7 +63,7 @@ ConstDefList
 
 ConstDef
 : IDENT '=' ConstInitVal {}
-| IDENT ConstExpSQBList '=' InitVal {}
+| IDENT ConstExpSQBList '=' ConstInitVal {}
 
 ConstInitVal
 : ConstExp {}
@@ -170,7 +170,7 @@ PrimaryExp
 UnaryExp
 : PrimaryExp {}
 | IDENT LPAREN RPAREN {}
-| IDENT LPAREN FuncRParams RPAREN {}
+| IDENT LPAREN FuncRParams RPAREN {} // function call
 | UnaryOp UnaryExp {}
 
 UnaryOp
