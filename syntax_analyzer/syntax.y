@@ -23,7 +23,7 @@ void yyerror(const char *s);
 %token <sval>LE GE EQ NE LOR LAND
 
 %type <sval>Decl ConstDecl VarDecl ConstDef ConstDefList VarDef VarDefList ConstInitVal InitVal ConstInitValList InitValList
-%type <sval>Exp ExpSQBList ConstExp ConstExpSQBList AddExp LOrExp PrimaryExp UnaryExp UnaryOp MulExp RelExp EqExp LAndExp
+%type <sval>Exp ArrayIndex ConstExp ConstArrayIndex AddExp LOrExp PrimaryExp UnaryExp UnaryOp MulExp RelExp EqExp LAndExp
 %type <sval>FuncDef FuncType FuncFParam FuncFParams FuncRParams
 %type <sval>Block BlockItem BlockItemList Stmt LVal Cond
 
@@ -63,7 +63,7 @@ ConstDefList
 
 ConstDef
 : IDENT '=' ConstInitVal {}
-| IDENT ConstExpSQBList '=' ConstInitVal {}
+| IDENT ConstArrayIndex '=' ConstInitVal {}
 
 ConstInitVal
 : ConstExp {}
@@ -84,12 +84,12 @@ VarDefList
 VarDef
 : IDENT {}
 | IDENT '=' InitVal {}
-| IDENT ConstExpSQBList {}
-| IDENT ConstExpSQBList '=' InitVal {}
+| IDENT ConstArrayIndex {}
+| IDENT ConstArrayIndex '=' InitVal {}
 
-ConstExpSQBList
+ConstArrayIndex
 : LEFTSQB ConstExp RIGHTSQB {}
-| ConstExpSQBList LEFTSQB ConstExp RIGHTSQB {}
+| ConstArrayIndex LEFTSQB ConstExp RIGHTSQB {}
 
 InitVal
 : Exp {}
@@ -119,18 +119,19 @@ FuncFParams
 FuncFParam
 : VarType IDENT {}
 | VarType IDENT LEFTSQB RIGHTSQB {}
-| VarType IDENT LEFTSQB RIGHTSQB ExpSQBList {}
+| VarType IDENT LEFTSQB RIGHTSQB ArrayIndex {}
 
-ExpSQBList
+ArrayIndex
 : LEFTSQB Exp RIGHTSQB {}
-| ExpSQBList LEFTSQB Exp RIGHTSQB {}
+| ArrayIndex LEFTSQB Exp RIGHTSQB {}
 
 Block
-: LEFTBRACE BlockItemList RIGHTBRACE {}
+: LEFTBRACE RIGHTBRACE {}
+| LEFTBRACE BlockItemList RIGHTBRACE {}
 
 BlockItemList
-: BlockItem BlockItemList {}
-| /*empty*/ {}
+: BlockItem {}
+| BlockItem BlockItemList {}
 
 BlockItem
 : Decl {}
@@ -160,7 +161,7 @@ Cond
 
 LVal
 : IDENT {}
-| IDENT ExpSQBList {}
+| IDENT ArrayIndex {}
 
 PrimaryExp
 : LPAREN Exp RPAREN {}
