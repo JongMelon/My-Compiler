@@ -151,4 +151,8 @@ comment_block \/\*([^*]|\*[^/])*\*\/
 
 "\r\n" {}
 
+. {
+    return yytext[0];
+}
+
 %%
