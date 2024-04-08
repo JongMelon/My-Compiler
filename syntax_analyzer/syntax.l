@@ -16,10 +16,10 @@ letter [a-zA-Z]
 digit [0-9]
 binary_digit [01]
 hex_digit [0-9a-fA-F]
-octal_digit [0-7]
 
+deci_num [1-9][0-9]*
 binary_num (0[b]){binary_digit}+
-octal_num ^(0){octal_digit}+$
+octal_num 0[0-7]*
 hex_num (0[xX]){hex_digit}+
 
 id (\_)*{letter}(\_)*({letter}|{digit})*
@@ -121,7 +121,7 @@ comment_block \/\*([^*]|\*[^/])*\*\/
     return IDENT;
 }
 
-{digit}+ {
+{deci_num} {
     yylval.ival = strtol(yytext, nullptr, 10);
     return INTCONST;
 }
