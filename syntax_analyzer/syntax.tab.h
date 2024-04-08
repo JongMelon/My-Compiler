@@ -44,6 +44,12 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 1 "syntax.y"
+
+    #include "Tree.h"
+
+#line 53 "syntax.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -85,13 +91,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 11 "syntax.y"
+#line 17 "syntax.y"
 
     int ival;
     char chval;
-    std::string sval;
+    std::string* sval;
+    Tree* tree;
 
-#line 95 "syntax.tab.h"
+#line 102 "syntax.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

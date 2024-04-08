@@ -51,492 +51,495 @@ void yyerror(const char *s);
 
 CompUnit
 : CompList {
-    shared_ptr<CompUnit> compUnit = make_shared<CompUnit>();
+    auto compUnit = new CompUnit();
     compUnit->compList = shared_ptr<CompList>((CompList* )$1);
-    $$ = compUnit.get();
+    $$ = compUnit;
+    std::cout << "digraph \" \"{" << std::endl;
+    std::cout << "node [shape = record,height=.1]" << std::endl;
     compUnit->print(0, "");
+    std::cout << "}" << std::endl;
 }
 
 CompList
 : DecOrDef {
-    shared_ptr<CompList> compList = make_shared<CompList>();
+    auto compList = new CompList();
     compList->declOrDef = shared_ptr<DeclOrDef>((DeclOrDef* )$1);
-    $$ = compList.get();
+    $$ = compList;
 }
 | CompList DecOrDef {
-    shared_ptr<CompList> compList = make_shared<CompList>();
+    auto compList = new CompList();
     compList->if_more_CompList = true;
     compList->compList = shared_ptr<CompList>((CompList* )$1);
     compList->declOrDef = shared_ptr<DeclOrDef>((DeclOrDef* )$2);
-    $$ = compList.get();
+    $$ = compList;
 }
 
 DecOrDef
 : Decl {
-    shared_ptr<DeclOrDef> decOrDef = make_shared<DeclOrDef>();
+    auto decOrDef = new DeclOrDef();
     decOrDef->if_decl = true;
     decOrDef->decl = shared_ptr<Decl>((Decl* )$1);
-    $$ = decOrDef.get();
+    $$ = decOrDef;
 }
 | FuncDef {
-    shared_ptr<DeclOrDef> decOrDef = make_shared<DeclOrDef>();
+    auto decOrDef = new DeclOrDef();
     decOrDef->funcDef = shared_ptr<FuncDef>((FuncDef* )$1);
-    $$ = decOrDef.get();
+    $$ = decOrDef;
 }
 
 Decl
 : ConstDecl {
-    shared_ptr<Decl> decl = make_shared<Decl>();
+    auto decl = new Decl();
     decl->decType = DecType::ConstDecl;
     decl->constDecl = shared_ptr<ConstDecl>((ConstDecl* )$1);
-    $$ = decl.get();
+    $$ = decl;
 }
 | VarDecl {
-    shared_ptr<Decl> decl = make_shared<Decl>();
+    auto decl = new Decl();
     decl->decType = DecType::VarDecl;
     decl->varDecl = shared_ptr<VarDecl>((VarDecl* )$1);
-    $$ = decl.get();
+    $$ = decl;
 }
 
 ConstDecl
 : CONST VarType ConstDefList ';' {
-    shared_ptr<ConstDecl> constDecl = make_shared<ConstDecl>();
+    auto constDecl = new ConstDecl();
     constDecl->varType = shared_ptr<VarType>((VarType* )$2);
     constDecl->constDefList = shared_ptr<ConstDefList>((ConstDefList* )$3);
-    $$ = constDecl.get();
+    $$ = constDecl;
 }
 
 ConstDefList
 : ConstDef {
-    shared_ptr<ConstDefList> constDefList = make_shared<ConstDefList>();
+    auto constDefList = new ConstDefList();
     constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )$1);
-    $$ = constDefList.get();
+    $$ = constDefList;
 }
 | ConstDef ',' ConstDefList {
-    shared_ptr<ConstDefList> constDefList = make_shared<ConstDefList>();
+    auto constDefList = new ConstDefList();
     constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )$1);
     constDefList->constDefList = shared_ptr<ConstDefList>((ConstDefList* )$3);
-    $$ = constDefList.get();
+    $$ = constDefList;
 }
 
 ConstDef
 : IDENT '=' ConstInitVal {
-    shared_ptr<ConstDef> constDef = make_shared<ConstDef>();
+    auto constDef = new ConstDef();
     constDef->varKind = VarKind::Var;
     constDef->ident = *($1);
     constDef->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )$3);
-    $$ = constDef.get();
+    $$ = constDef;
 }
 | IDENT ConstArrayIndex '=' ConstInitVal {
-    shared_ptr<ConstDef> constDef = make_shared<ConstDef>();
+    auto constDef = new ConstDef();
     constDef->varKind = VarKind::Array;
     constDef->ident = *($1);
     constDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$2);
     constDef->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )$4);
-    $$ = constDef.get();
+    $$ = constDef;
 }
 
 ConstInitVal
 : ConstExp {
-    shared_ptr<ConstInitVal> constInitVal = make_shared<ConstInitVal>();
+    auto constInitVal = new ConstInitVal();
     constInitVal->constExp = shared_ptr<ConstExp>((ConstExp* )$1);
-    $$ = constInitVal.get();
+    $$ = constInitVal;
 }
 | LEFTBRACE RIGHTBRACE {
-    shared_ptr<ConstInitVal> constInitVal = make_shared<ConstInitVal>();
+    auto constInitVal = new ConstInitVal();
     constInitVal->varKind = VarKind::Array;
-    $$ = constInitVal.get();
+    $$ = constInitVal;
 }
 | LEFTBRACE ConstInitValList RIGHTBRACE {
-    shared_ptr<ConstInitVal> constInitVal = make_shared<ConstInitVal>();
+    auto constInitVal = new ConstInitVal();
     constInitVal->varKind = VarKind::Array;
     constInitVal->constInitValList = shared_ptr<ConstInitValList>((ConstInitValList* )$2);
-    $$ = constInitVal.get();
+    $$ = constInitVal;
 }
 
 ConstInitValList
 : ConstInitVal {
-    shared_ptr<ConstInitValList> constInitValList = make_shared<ConstInitValList>();
+    auto constInitValList = new ConstInitValList();
     constInitValList->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )$1);
-    $$ = constInitValList.get();
+    $$ = constInitValList;
 }
 | ConstInitVal ',' ConstInitValList {
-    shared_ptr<ConstInitValList> constInitValList = make_shared<ConstInitValList>();
+    auto constInitValList = new ConstInitValList();
     constInitValList->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )$1);
     constInitValList->constInitValList = shared_ptr<ConstInitValList>((ConstInitValList* )$3);
-    $$ = constInitValList.get();
+    $$ = constInitValList;
 }
 
 VarDecl
 : FuncType VarDefList ';' {
-    shared_ptr<VarDecl> varDecl = make_shared<VarDecl>();
+    auto varDecl = new VarDecl();
     varDecl->varDefList = shared_ptr<VarDefList>((VarDefList* )$2);
-    $$ = varDecl.get();
+    $$ = varDecl;
 }
 
 VarDefList
 : VarDef {
-    shared_ptr<VarDefList> varDefList = make_shared<VarDefList>();
+    auto varDefList = new VarDefList();
     varDefList->varDef = shared_ptr<VarDef>((VarDef* )$1);
-    $$ = varDefList.get();
+    $$ = varDefList;
 }
 | VarDef ',' VarDefList {
-    shared_ptr<VarDefList> varDefList = make_shared<VarDefList>();
+    auto varDefList = new VarDefList();
     varDefList->varDef = shared_ptr<VarDef>((VarDef* )$1);
     varDefList->varDefList = shared_ptr<VarDefList>((VarDefList* )$3);
-    $$ = varDefList.get();
+    $$ = varDefList;
 }
 
 VarDef
 : IDENT {
-    shared_ptr<VarDef> varDef = make_shared<VarDef>();
+    auto varDef = new VarDef();
     varDef->varKind = VarKind::Var;
     varDef->ident = *($1);
-    $$ = varDef.get();
+    $$ = varDef;
 }
 | IDENT '=' InitVal {
-    shared_ptr<VarDef> varDef = make_shared<VarDef>();
+    auto varDef = new VarDef();
     varDef->varKind = VarKind::Var;
     varDef->ident = *($1);
     varDef->initVal = shared_ptr<InitVal>((InitVal* )$3);
-    $$ = varDef.get();
+    $$ = varDef;
 }
 | IDENT ConstArrayIndex {
-    shared_ptr<VarDef> varDef = make_shared<VarDef>();
+    auto varDef = new VarDef();
     varDef->varKind = VarKind::Array;
     varDef->ident = *($1);
     varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$2);
-    $$ = varDef.get();
+    $$ = varDef;
 }
 | IDENT ConstArrayIndex '=' InitVal {
-    shared_ptr<VarDef> varDef = make_shared<VarDef>();
+    auto varDef = new VarDef();
     varDef->varKind = VarKind::Array;
     varDef->ident = *($1);
     varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$2);
     varDef->initVal = shared_ptr<InitVal>((InitVal* )$4);
-    $$ = varDef.get();
+    $$ = varDef;
 }
 
 ConstArrayIndex
 : LEFTSQB ConstExp RIGHTSQB {
-    shared_ptr<ConstArrayIndex> constArrayIndex = make_shared<ConstArrayIndex>();
+    auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->const_exp = shared_ptr<ConstExp>((ConstExp* )$2);
-    $$ = constArrayIndex.get();
+    $$ = constArrayIndex;
 }
 | ConstArrayIndex LEFTSQB ConstExp RIGHTSQB {
-    shared_ptr<ConstArrayIndex> constArrayIndex = make_shared<ConstArrayIndex>();
+    auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$1);
     constArrayIndex->const_exp = shared_ptr<ConstExp>((ConstExp* )$3);
-    $$ = constArrayIndex.get();
+    $$ = constArrayIndex;
 }
 
 InitVal
 : Exp {
-    shared_ptr<InitVal> initVal = make_shared<InitVal>();
+    auto initVal = new InitVal();
     initVal->varKind = VarKind::Var;
     initVal->exp = shared_ptr<Exp>((Exp* )$1);
-    $$ = initVal.get();
+    $$ = initVal;
 }
 | LEFTBRACE RIGHTBRACE {
-    shared_ptr<InitVal> initVal = make_shared<InitVal>();
+    auto initVal = new InitVal();
     initVal->varKind = VarKind::Array;
-    $$ = initVal.get();
+    $$ = initVal;
 }
 | LEFTBRACE InitValList RIGHTBRACE {
-    shared_ptr<InitVal> initVal = make_shared<InitVal>();
+    auto initVal = new InitVal();
     initVal->varKind = VarKind::Array;
     initVal->initValList = shared_ptr<InitValList>((InitValList* )$2);
-    $$ = initVal.get();
+    $$ = initVal;
 }
 
 InitValList
 : InitVal {
-    shared_ptr<InitValList> initValList = make_shared<InitValList>();
+    auto initValList = new InitValList();
     initValList->initVal = shared_ptr<InitVal>((InitVal* )$1);
-    $$ = initValList.get();
+    $$ = initValList;
 }
 | InitVal ',' InitValList {
-    shared_ptr<InitValList> initValList = make_shared<InitValList>();
+    auto initValList = new InitValList();
     initValList->initVal = shared_ptr<InitVal>((InitVal* )$1);
     initValList->initValList = shared_ptr<InitValList>((InitValList* )$3);
-    $$ = initValList.get();
+    $$ = initValList;
 }
 
 FuncDef
 : FuncType IDENT LPAREN RPAREN Block {
-    shared_ptr<FuncDef> funcDef = make_shared<FuncDef>();
+    auto funcDef = new FuncDef();
     funcDef->funcType = shared_ptr<FuncType>((FuncType* )$1);
     funcDef->ident = *($2);
     funcDef->block = shared_ptr<Block>((Block* )$5);
-    $$ = funcDef.get();
+    $$ = funcDef;
 }
 | FuncType IDENT LPAREN FuncFParamList RPAREN Block {
-    shared_ptr<FuncDef> funcDef = make_shared<FuncDef>();
+    auto funcDef = new FuncDef();
     funcDef->funcType = shared_ptr<FuncType>((FuncType* )$1);
     funcDef->ident = *($2);
     funcDef->funcFParamList = shared_ptr<FuncFParamList>((FuncFParamList* )$4);
     funcDef->block = shared_ptr<Block>((Block* )$6);
-    $$ = funcDef.get();
+    $$ = funcDef;
 }
 
 VarType
 : INT {
-    shared_ptr<VarType> varType = make_shared<VarType>();
+    auto varType = new VarType();
     varType->type = "int";
-    $$ = varType.get();
+    $$ = varType;
 }
 
 FuncType
 : VOID {
-    shared_ptr<FuncType> funcType = make_shared<FuncType>();
+    auto funcType = new FuncType();
     funcType->type = "void";
-    $$ = funcType.get();
+    $$ = funcType;
 }
 | INT {
-    shared_ptr<FuncType> funcType = make_shared<FuncType>();
+    auto funcType = new FuncType();
     funcType->type = "int";
-    $$ = funcType.get();
+    $$ = funcType;
 }
 
 FuncFParamList
 : FuncFParam {
-    shared_ptr<FuncFParamList> funcFParamList = make_shared<FuncFParamList>();
+    auto funcFParamList = new FuncFParamList();
     funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )$1);
-    $$ = funcFParamList.get();
+    $$ = funcFParamList;
 }
 | FuncFParam ',' FuncFParamList {
-    shared_ptr<FuncFParamList> funcFParamList = make_shared<FuncFParamList>();
+    auto funcFParamList = new FuncFParamList();
     funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )$1);
     funcFParamList->funcFParamList = shared_ptr<FuncFParamList>((FuncFParamList* )$3);
-    $$ = funcFParamList.get();
+    $$ = funcFParamList;
 }
 
 FuncFParam
 : VarType IDENT {
-    shared_ptr<FuncFParam> funcFParam = make_shared<FuncFParam>();
+    auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Var;
     funcFParam->varType = shared_ptr<VarType>((VarType* )$1);
     funcFParam->ident = *($2);
-    $$ = funcFParam.get();
+    $$ = funcFParam;
 }
 | VarType IDENT LEFTSQB RIGHTSQB {
-    shared_ptr<FuncFParam> funcFParam = make_shared<FuncFParam>();
+    auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Array;
     funcFParam->varType = shared_ptr<VarType>((VarType* )$1);
     funcFParam->ident = *($2);
-    $$ = funcFParam.get();
+    $$ = funcFParam;
 }
 | VarType IDENT LEFTSQB RIGHTSQB ArrayIndex {
-    shared_ptr<FuncFParam> funcFParam = make_shared<FuncFParam>();
+    auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Array;
     funcFParam->varType = shared_ptr<VarType>((VarType* )$1);
     funcFParam->ident = *($2);
     funcFParam->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$5);
-    $$ = funcFParam.get();
+    $$ = funcFParam;
 }
 
 ArrayIndex
 : LEFTSQB Exp RIGHTSQB {
-    shared_ptr<ArrayIndex> arrayIndex = make_shared<ArrayIndex>();
+    auto arrayIndex = new ArrayIndex();
     arrayIndex->exp = shared_ptr<Exp>((Exp* )$2);
-    $$ = arrayIndex.get();
+    $$ = arrayIndex;
 }
 | ArrayIndex LEFTSQB Exp RIGHTSQB {
-    shared_ptr<ArrayIndex> arrayIndex = make_shared<ArrayIndex>();
+    auto arrayIndex = new ArrayIndex();
     arrayIndex->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$1);
     arrayIndex->exp = shared_ptr<Exp>((Exp* )$3);
-    $$ = arrayIndex.get();
+    $$ = arrayIndex;
 }
 
 Block
 : LEFTBRACE RIGHTBRACE {
-    shared_ptr<Block> block = make_shared<Block>();
-    $$ = block.get();
+    auto block = new Block();
+    $$ = block;
 }
 | LEFTBRACE BlockItemList RIGHTBRACE {
-    shared_ptr<Block> block = make_shared<Block>();
+    auto block = new Block();
     block->blockItemList = shared_ptr<BlockItemList>((BlockItemList* )$2);
-    $$ = block.get();
+    $$ = block;
 }
 
 BlockItemList
 : BlockItem {
-    shared_ptr<BlockItemList> blockItemList = make_shared<BlockItemList>();
+    auto blockItemList = new BlockItemList();
     blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )$1);
-    $$ = blockItemList.get();
+    $$ = blockItemList;
 }
 | BlockItem BlockItemList {
-    shared_ptr<BlockItemList> blockItemList = make_shared<BlockItemList>();
+    auto blockItemList = new BlockItemList();
     blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )$1);
     blockItemList->blockItemList = shared_ptr<BlockItemList>((BlockItemList* )$2);
-    $$ = blockItemList.get();
+    $$ = blockItemList;
 }
 
 BlockItem
 : Decl {
-    shared_ptr<BlockItem> blockItem = make_shared<BlockItem>();
+    auto blockItem = new BlockItem();
     blockItem->blockItemType = BlockItemType::Decl;
     blockItem->decl = shared_ptr<Decl>((Decl* )$1);
-    $$ = blockItem.get();
+    $$ = blockItem;
 }
 | Stmt {
-    shared_ptr<BlockItem> blockItem = make_shared<BlockItem>();
+    auto blockItem = new BlockItem();
     blockItem->blockItemType = BlockItemType::Stmt;
     blockItem->stmt = shared_ptr<Stmt>((Stmt* )$1);
-    $$ = blockItem.get();
+    $$ = blockItem;
 }
 
 Stmt
 : LVal '=' Exp ';' {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::Assign;
     stmt->lVal = shared_ptr<LVal>((LVal* )$1);
     stmt->exp = shared_ptr<Exp>((Exp* )$3);
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | ';' {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::Empty;
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | Exp ';' {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::Exp;
     stmt->exp = shared_ptr<Exp>((Exp* )$1);
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | Block {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::Block;
     stmt->block = shared_ptr<Block>((Block* )$1);
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | IF LPAREN Cond RPAREN Stmt {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::If;
     stmt->cond = shared_ptr<Cond>((Cond* )$3);
     stmt->stmt_if = shared_ptr<Stmt>((Stmt* )$5);
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | IF LPAREN Cond RPAREN Stmt ELSE Stmt {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::IfElse;
     stmt->cond = shared_ptr<Cond>((Cond* )$3);
     stmt->stmt_if = shared_ptr<Stmt>((Stmt* )$5);
     stmt->stmt_if_else = shared_ptr<Stmt>((Stmt* )$7);
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | WHILE LPAREN Cond RPAREN Stmt {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::While;
     stmt->cond = shared_ptr<Cond>((Cond* )$3);
     stmt->stmt_while = shared_ptr<Stmt>((Stmt* )$5);
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | BREAK ';' {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::Break;
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | CONTINUE ';' {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::Continue;
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | RETURN ';' {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
+    auto stmt = new Stmt();
     stmt->stmtType = StmtType::Return;
-    $$ = stmt.get();
+    $$ = stmt;
 }
 | RETURN Exp ';' {
-    shared_ptr<Stmt> stmt = make_shared<Stmt>();
-    stmt->stmtType = StmtType::Return;
+    auto stmt = new Stmt();
+    stmt->stmtType = StmtType::ReturnExp;
     stmt->exp = shared_ptr<Exp>((Exp* )$2);
-    $$ = stmt.get();
+    $$ = stmt;
 }
 
 ConstExp
 : Exp {
-    shared_ptr<ConstExp> constExp = make_shared<ConstExp>();
+    auto constExp = new ConstExp();
     constExp->exp = shared_ptr<Exp>((Exp* )$1);
-    $$ = constExp.get();
+    $$ = constExp;
 }
 
 Exp
 : AddExp {
-    shared_ptr<Exp> exp = make_shared<Exp>();
+    auto exp = new Exp();
     exp->add_exp = shared_ptr<AddExp>((AddExp* )$1);
-    $$ = exp.get();
+    $$ = exp;
 }
 
 Cond
 : LOrExp {
-    shared_ptr<Cond> cond = make_shared<Cond>();
+    auto cond = new Cond();
     cond->lOrExp = shared_ptr<LOrExp>((LOrExp* )$1);
-    $$ = cond.get();
+    $$ = cond;
 }
 
 LVal
 : IDENT {
-    shared_ptr<LVal> lVal = make_shared<LVal>();
+    auto lVal = new LVal();
     lVal->varKind = VarKind::Var;
     lVal->ident = *($1);
-    $$ = lVal.get();
+    $$ = lVal;
 }
 | IDENT ArrayIndex {
-    shared_ptr<LVal> lVal = make_shared<LVal>();
+    auto lVal = new LVal();
     lVal->varKind = VarKind::Array;
     lVal->ident = *($1);
     lVal->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$2);
-    $$ = lVal.get();
+    $$ = lVal;
 }
 
 PrimaryExp
 : LPAREN Exp RPAREN {
-    shared_ptr<PrimaryExp> primaryExp = make_shared<PrimaryExp>();
+    auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::Exp;
     primaryExp->exp = shared_ptr<Exp>((Exp* )$2);
-    $$ = primaryExp.get();
+    $$ = primaryExp;
 }
 | LVal {
-    shared_ptr<PrimaryExp> primaryExp = make_shared<PrimaryExp>();
+    auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::LVal;
     primaryExp->lVal = shared_ptr<LVal>((LVal* )$1);
-    $$ = primaryExp.get();
+    $$ = primaryExp;
 }
 | INTCONST {
-    shared_ptr<PrimaryExp> primaryExp = make_shared<PrimaryExp>();
+    auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::Number;
     primaryExp->number = $1;
-    $$ = primaryExp.get();
+    $$ = primaryExp;
 }
 
 UnaryExp
 : PrimaryExp {
-    shared_ptr<UnaryExp> unaryExp = make_shared<UnaryExp>();
+    auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::PrimaryExp;
     unaryExp->primary_exp = shared_ptr<PrimaryExp>((PrimaryExp* )$1);
-    $$ = unaryExp.get();
+    $$ = unaryExp;
 }
 | IDENT LPAREN RPAREN {
-    shared_ptr<UnaryExp> unaryExp = make_shared<UnaryExp>();
+    auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::FuncCall;
     unaryExp->func_ident = *($1);
-    $$ = unaryExp.get();
+    $$ = unaryExp;
 }
 | IDENT LPAREN FuncRParamList RPAREN {
-    shared_ptr<UnaryExp> unaryExp = make_shared<UnaryExp>();
+    auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::FuncCall;
     unaryExp->func_ident = *($1);
     unaryExp->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )$3);
-    $$ = unaryExp.get();
+    $$ = unaryExp;
 } // function call
 | UnaryOp UnaryExp {
-    shared_ptr<UnaryExp> unaryExp = make_shared<UnaryExp>();
+    auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::OP_Exp;
     unaryExp->op = $1;
     unaryExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )$2);
-    $$ = unaryExp.get();
+    $$ = unaryExp;
 }
 
 UnaryOp
@@ -552,165 +555,165 @@ UnaryOp
 
 FuncRParamList
 : Exp {
-    shared_ptr<FuncRParamList> funcRParamList = make_shared<FuncRParamList>();
+    auto funcRParamList = new FuncRParamList();
     funcRParamList->exp = shared_ptr<Exp>((Exp* )$1);
-    $$ = funcRParamList.get();
+    $$ = funcRParamList;
 }
 | Exp ',' FuncRParamList {
-    shared_ptr<FuncRParamList> funcRParamList = make_shared<FuncRParamList>();
+    auto funcRParamList = new FuncRParamList();
     funcRParamList->exp = shared_ptr<Exp>((Exp* )$1);
     funcRParamList->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )$3);
-    $$ = funcRParamList.get();
+    $$ = funcRParamList;
 }
 
 MulExp
 : UnaryExp {
-    shared_ptr<MulExp> mulExp = make_shared<MulExp>();
+    auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::UnaryExp;
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )$1);
-    $$ = mulExp.get();
+    $$ = mulExp;
 }
 | MulExp '*' UnaryExp {
-    shared_ptr<MulExp> mulExp = make_shared<MulExp>();
+    auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
     mulExp->mul_exp = shared_ptr<MulExp>((MulExp* )$1);
-    mulExp->op = $2;
+    mulExp->op = "*";
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )$3);
-    $$ = mulExp.get();
+    $$ = mulExp;
 }
 | MulExp '/' UnaryExp {
-    shared_ptr<MulExp> mulExp = make_shared<MulExp>();
+    auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
     mulExp->mul_exp = shared_ptr<MulExp>((MulExp* )$1);
-    mulExp->op = $2;
+    mulExp->op = "/";
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )$3);
-    $$ = mulExp.get();
+    $$ = mulExp;
 }
 | MulExp '%' UnaryExp {
-    shared_ptr<MulExp> mulExp = make_shared<MulExp>();
+    auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
     mulExp->mul_exp = shared_ptr<MulExp>((MulExp* )$1);
-    mulExp->op = $2;
+    mulExp->op = "%";
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )$3);
-    $$ = mulExp.get();
+    $$ = mulExp;
 }
 
 AddExp
 : MulExp {
-    shared_ptr<AddExp> addExp = make_shared<AddExp>();
+    auto addExp = new AddExp();
     addExp->addExpType = AddExpType::MulExp;
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )$1);
-    $$ = addExp.get();
+    $$ = addExp;
 }
 | AddExp '+' MulExp {
-    shared_ptr<AddExp> addExp = make_shared<AddExp>();
+    auto addExp = new AddExp();
     addExp->addExpType = AddExpType::AddMulExp;
     addExp->add_exp = shared_ptr<AddExp>((AddExp* )$1);
-    addExp->op = $2;
+    addExp->op = "+";
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )$3);
-    $$ = addExp.get();
+    $$ = addExp;
 }
 | AddExp '-' MulExp {
-    shared_ptr<AddExp> addExp = make_shared<AddExp>();
+    auto addExp = new AddExp();
     addExp->addExpType = AddExpType::AddMulExp;
     addExp->add_exp = shared_ptr<AddExp>((AddExp* )$1);
-    addExp->op = $2;
+    addExp->op = "-";
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )$3);
-    $$ = addExp.get();
+    $$ = addExp;
 }
 
 RelExp
 : AddExp {
-    shared_ptr<RelExp> relExp = make_shared<RelExp>();
+    auto relExp = new RelExp();
     relExp->relExpType = RelExpType::AddExp;
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )$1);
-    $$ = relExp.get();
+    $$ = relExp;
 }
 | RelExp '<' AddExp {
-    shared_ptr<RelExp> relExp = make_shared<RelExp>();
+    auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
-    relExp->op = $2;
+    relExp->op = "\\<";
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
-    $$ = relExp.get();
+    $$ = relExp;
 }
 | RelExp '>' AddExp {
-    shared_ptr<RelExp> relExp = make_shared<RelExp>();
+    auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
-    relExp->op = $2;
+    relExp->op = "\\>";
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
-    $$ = relExp.get();
+    $$ = relExp;
 }
 | RelExp LE AddExp {
-    shared_ptr<RelExp> relExp = make_shared<RelExp>();
+    auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
-    relExp->op = "<=";
+    relExp->op = "\\<=";
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
-    $$ = relExp.get();
+    $$ = relExp;
 }
 | RelExp GE AddExp {
-    shared_ptr<RelExp> relExp = make_shared<RelExp>();
+    auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
-    relExp->op = ">=";
+    relExp->op = "\\>=";
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
-    $$ = relExp.get();
+    $$ = relExp;
 }
 
 EqExp
 : RelExp {
-    shared_ptr<EqExp> eqExp = make_shared<EqExp>();
+    auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::RelExp;
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
-    $$ = eqExp.get();
+    $$ = eqExp;
 }
 | EqExp EQ RelExp {
-    shared_ptr<EqExp> eqExp = make_shared<EqExp>();
+    auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::EqRelExp;
     eqExp->eqExp = shared_ptr<EqExp>((EqExp* )$1);
     eqExp->op = "==";
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )$3);
-    $$ = eqExp.get();
+    $$ = eqExp;
 }
 | EqExp NE RelExp {
-    shared_ptr<EqExp> eqExp = make_shared<EqExp>();
+    auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::EqRelExp;
     eqExp->eqExp = shared_ptr<EqExp>((EqExp* )$1);
     eqExp->op = "!=";
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )$3);
-    $$ = eqExp.get();
+    $$ = eqExp;
 }
 
 LAndExp
 : EqExp {
-    shared_ptr<LAndExp> lAndExp = make_shared<LAndExp>();
+    auto lAndExp = new LAndExp();
     lAndExp->lAndExpType = LAndExpType::EqExp;
     lAndExp->eqExp = shared_ptr<EqExp>((EqExp* )$1);
-    $$ = lAndExp.get();
+    $$ = lAndExp;
 }
 | LAndExp LAND EqExp {
-    shared_ptr<LAndExp> lAndExp = make_shared<LAndExp>();
+    auto lAndExp = new LAndExp();
     lAndExp->lAndExpType = LAndExpType::LAndEqExp;
     lAndExp->lAndExp = shared_ptr<LAndExp>((LAndExp* )$1);
     lAndExp->eqExp = shared_ptr<EqExp>((EqExp* )$3);
-    $$ = lAndExp.get();
+    $$ = lAndExp;
 }
 
 LOrExp
 : LAndExp {
-    shared_ptr<LOrExp> lOrExp = make_shared<LOrExp>();
+    auto lOrExp = new LOrExp();
     lOrExp->lOrExpType = LOrExpType::LAndExp;
     lOrExp->lAndExp = shared_ptr<LAndExp>((LAndExp* )$1);
-    $$ = lOrExp.get();
+    $$ = lOrExp;
 }
 | LOrExp LOR LAndExp {
-    shared_ptr<LOrExp> lOrExp = make_shared<LOrExp>();
+    auto lOrExp = new LOrExp();
     lOrExp->lOrExpType = LOrExpType::LOrLAndExp;
     lOrExp->lOrExp = shared_ptr<LOrExp>((LOrExp* )$1);
     lOrExp->lAndExp = shared_ptr<LAndExp>((LAndExp* )$3);
-    $$ = lOrExp.get();
+    $$ = lOrExp;
 }
 
 
@@ -723,7 +726,7 @@ void yyerror(const char *s) {
 int main()
 {
     freopen("input.sy", "r", stdin);
-    freopen("output.txt", "w", stdout);
+    freopen("output.dot", "w", stdout);
     yyparse();
     fclose(stdin);
     fclose(stdout);
