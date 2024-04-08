@@ -307,7 +307,6 @@ class Stmt : public Tree {
         shared_ptr<Stmt> stmt_if;
         shared_ptr<Stmt> stmt_if_else;
         shared_ptr<Stmt> stmt_while;
-        shared_ptr<Exp> exp_return;
         void print(int parent, string part);
 };
 
@@ -379,7 +378,7 @@ class UnaryExp : public Tree {
         shared_ptr<PrimaryExp> primary_exp;
         string func_ident;
         shared_ptr<FuncRParamList> funcRParamList;
-        char op;
+        string op;
         shared_ptr<UnaryExp> unary_exp;
         void print(int parent, string part);
 };
