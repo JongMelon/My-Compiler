@@ -97,7 +97,7 @@ void ConstDef::print(int parent, string part) {
     if (varKind == VarKind::Var) {
         cout << "node" << node_id << "[label = \"<f0> const |<f1> int|<f2> ConstDef|<f3> ;\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-        cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> =|<f2> [ConstInitVal]\"];" << endl;
+        cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> =|<f2> ConstInitVal\"];" << endl;
         cout << "\"node" << node_id << "\":" << "f2" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id++;
         this->constInitVal->print(node_id++, "f2");
@@ -105,7 +105,7 @@ void ConstDef::print(int parent, string part) {
     else {
         cout << "node" << node_id << "[label = \"<f0> const |<f1> int|<f2> ConstDef|<f3> ;\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-        cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> ConstArrayIndex|<f2> =|<f3> [ConstInitVal]\"];" << endl;
+        cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> ConstArrayIndex|<f2> =|<f3> ConstInitVal\"];" << endl;
         cout << "\"node" << node_id << "\":" << "f2" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id++;
         int parent_id = node_id;
@@ -121,7 +121,7 @@ void VarDef::print(int parent, string part) {
         if (varKind == VarKind::Var) {
             cout << "node" << node_id << "[label = \"<f0> int|<f1> VarDef\"];" << endl;
             cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-            cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> =|<f2> [InitVal]\"];" << endl;
+            cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> =|<f2> InitVal\"];" << endl;
             cout << "\"node" << node_id << "\":" << "f1" << "->\"node" << node_id + 1 << "\";" << endl;
             node_id++;
             this->initVal->print(node_id++, "f2");
@@ -163,12 +163,12 @@ void InitVal::print(int parent, string part) {
     }
     else {
         if (initValList == nullptr) {
-            cout << "node" << node_id << "[label = \"<f0> {|<f1> }\"];" << endl;
+            cout << "node" << node_id << "[label = \"<f0> \\{|<f1> \\}\"];" << endl;
             cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
             node_id++;
         }
         else {
-            cout << "node" << node_id << "[label = \"<f0> {|<f1> InitValList|<f2> }\"];" << endl;
+            cout << "node" << node_id << "[label = \"<f0> \\{|<f1> InitValList|<f2> \\}\"];" << endl;
             cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
             this->initValList->print(node_id++, "f1");
         }
@@ -197,12 +197,12 @@ void ConstInitVal::print(int parent, string part) {
     }
     else {
         if (constInitValList == nullptr) {
-            cout << "node" << node_id << "[label = \"<f0> {|<f1> }\"];" << endl;
+            cout << "node" << node_id << "[label = \"<f0> \\{|<f1> \\}\"];" << endl;
             cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
             node_id++;
         }
         else {
-            cout << "node" << node_id << "[label = \"<f0> {|<f1> ConstInitValList|<f2> }\"];" << endl;
+            cout << "node" << node_id << "[label = \"<f0> \\{|<f1> ConstInitValList|<f2> \\}\"];" << endl;
             cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
             this->constInitValList->print(node_id++, "f1");
         }
@@ -236,6 +236,9 @@ void LVal::print(int parent, string part) {
     else {
         cout << "node" << node_id << "[label = \"<f0> LVal\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> ArrayIndex\"];" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+        node_id++;
         this->arrayIndex->print(node_id++, "f1");
     }
 }
@@ -335,12 +338,21 @@ void UnaryExp::print(int parent, string part) {
         this->primary_exp->print(node_id++, "f0");
     }
     else if (unaryExpType == UnaryExpType::FuncCall) {
-        cout << "node" << node_id << "[label = \"<f0> FuncCall\"];" << endl;
-        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-        cout << "node" << node_id + 1 << "[label = \"<f0> " << func_ident << "|<f1> (|<f2> FuncRParamList|<f3> )\"];" << endl;
-        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
-        node_id++;
-        this->funcRParamList->print(node_id++, "f2");
+        if (funcRParamList != nullptr) {
+            cout << "node" << node_id << "[label = \"<f0> FuncCall\"];" << endl;
+            cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+            cout << "node" << node_id + 1 << "[label = \"<f0> " << func_ident << "|<f1> (|<f2> FuncRParamList|<f3> )\"];" << endl;
+            cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+            node_id++;
+            this->funcRParamList->print(node_id++, "f2");
+        }
+        else {
+            cout << "node" << node_id << "[label = \"<f0> FuncCall\"];" << endl;
+            cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+            cout << "node" << node_id + 1 << "[label = \"<f0> " << func_ident << "|<f1> (|<f2> )\"];" << endl;
+            cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+            node_id += 2;
+        }
     }
     else {
         cout << "node" << node_id << "[label = \"<f0> UnaryExp|<f1> " << op << "|<f2> UnaryExp\"];" << endl;
@@ -523,13 +535,13 @@ void Block::print(int parent, string part) {
     cout << "node" << node_id << "[label = \"<f0> Block\"];" << endl;
     cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
     if (blockItemList != nullptr) {
-        cout << "node" << node_id + 1 << "[label = \"<f0> {|<f1> BlockItemList|<f2> }\"];" << endl;
+        cout << "node" << node_id + 1 << "[label = \"<f0> \\{|<f1> BlockItemList|<f2> \\}\"];" << endl;
         cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id++;
         this->blockItemList->print(node_id++, "f1");
     }
     else {
-        cout << "node" << node_id + 1 << "[label = \"<f0> {}\"];" << endl;
+        cout << "node" << node_id + 1 << "[label = \"<f0> \\{\\}\"];" << endl;
         cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id += 2;
     }
@@ -574,27 +586,25 @@ void Stmt::print(int parent, string part) {
         this->block->print(node_id++, "f0");
     }
     else if (stmtType == StmtType::If) {
-        if (stmt_if_else == nullptr) {
-            cout << "node" << node_id + 1 << "[label = \"<f0> if|<f1> (|<f2> Cond|<f3> )|<f4> Stmt\"];" << endl;
-            cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
-            node_id++;
-            int parent_id = node_id++;
-            this->cond->print(parent_id, "f2");
-            this->stmt_if->print(parent_id, "f4");
-        }
-        else {
-            cout << "node" << node_id + 1 << "[label = \"<f0> if|<f1> (|<f2> Cond|<f3> )|<f4> Stmt|<f5> else|<f6> Stmt\"];" << endl;
-            cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
-            node_id++;
-            int parent_id = node_id++;
-            this->cond->print(parent_id, "f2");
-            this->stmt_if->print(parent_id, "f4");
-            this->stmt_if_else->print(parent_id, "f6");
-        }
+        cout << "node" << node_id + 1 << "[label = \"<f0> if|<f1> (|<f2> Cond|<f3> )|<f4> Stmt\"];" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+        node_id++;
+        int parent_id = node_id++;
+        this->cond->print(parent_id, "f2");
+        this->stmt_if->print(parent_id, "f4");
+    }
+    else if (stmtType == StmtType::IfElse){
+        cout << "node" << node_id + 1 << "[label = \"<f0> if|<f1> (|<f2> Cond|<f3> )|<f4> Stmt|<f5> else|<f6> Stmt\"];" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+        node_id++;
+        int parent_id = node_id++;
+        this->cond->print(parent_id, "f2");
+        this->stmt_if->print(parent_id, "f4");
+        this->stmt_if_else->print(parent_id, "f6");
     }
     else if (stmtType == StmtType::While) {
         cout << "node" << node_id + 1 << "[label = \"<f0> while|<f1> (|<f2> Cond|<f3> )|<f4> Stmt\"];" << endl;
-        cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id++;
         int parent_id = node_id++;
         this->cond->print(parent_id, "f2");
@@ -602,34 +612,34 @@ void Stmt::print(int parent, string part) {
     }
     else if (stmtType == StmtType::Exp) {
         cout << "node" << node_id + 1 << "[label = \"<f0> Exp|<f1> ;\"];" << endl;
-        cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id++;
         this->exp->print(node_id++, "f0");
     }
     else if (stmtType == StmtType::ReturnExp) {
         cout << "node" << node_id + 1 << "[label = \"<f0> return|<f1> Exp|<f2> ;\"];" << endl;
-        cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id++;
-        this->exp_return->print(node_id++, "f1");
+        this->exp->print(node_id++, "f1");
     }
     else if (stmtType == StmtType::Return) {
         cout << "node" << node_id + 1 << "[label = \"<f0> return|<f1> ;\"];" << endl;
-        cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id += 2;
     }
     else if (stmtType == StmtType::Continue) {
         cout << "node" << node_id + 1 << "[label = \"<f0> continue|<f1> ;\"];" << endl;
-        cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id += 2;
     }
     else if (stmtType == StmtType::Break) {
         cout << "node" << node_id + 1 << "[label = \"<f0> break|<f1> ;\"];" << endl;
-        cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id += 2;
     }
     else {
         cout << "node" << node_id + 1 << "[label = \"<f0> ;\"];" << endl;
-        cout << "\"node" << node_id << "\":" << part << "->\"node" << node_id + 1 << "\";" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id += 2;
     }
 }
