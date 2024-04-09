@@ -137,6 +137,7 @@ class Tree {
     public:
         ~Tree() = default;
         virtual void print(int parent, string part) = 0;
+        bool err_empty = false;
 };
 
 class CompUnit : public Tree {
@@ -171,6 +172,7 @@ class Decl : public Tree {
 
 class VarDecl : public Tree {
     public:
+        bool unknownType = false;
         DecType decType = DecType::VarDecl;
         shared_ptr<VarDefList> varDefList;
         shared_ptr<VarType> varType;

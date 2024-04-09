@@ -44,15 +44,30 @@ void Decl::print(int parent, string part) {
 }
 
 void VarDecl::print(int parent, string part) {
-    cout << "node" << node_id << "[label = \"<f0> VarDecl\"];" << endl;
-    cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-    cout << "node" << node_id + 1 << "[label = \"<f0> int|<f1> VarDefList|<f2> ;\"];" << endl;
-    cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
-    node_id++;
+    if (unknownType) {
+        cout << "node" << node_id << "[label = \"<f0> VarDecl\"];" << endl;
+        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        cout << "node" << node_id + 1 << "[label = \"<f0> UnknownType|<f1> VarDefList|<f2> ;\"];" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+        node_id++;
+    }
+    else {
+        cout << "node" << node_id << "[label = \"<f0> VarDecl\"];" << endl;
+        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        cout << "node" << node_id + 1 << "[label = \"<f0> int|<f1> VarDefList|<f2> ;\"];" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+        node_id++;
+    }
     this->varDefList->print(node_id++, "f1");
 }
 
 void ConstDecl::print(int parent, string part) {
+    if (err_empty) {
+        cout << "node" << node_id << "[label = \"<f0> Error ConstDecl\"];" << endl;
+        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        node_id++;
+        return;
+    }
     cout << "node" << node_id << "[label = \"<f0> ConstDecl\"];" << endl;
     cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
     cout << "node" << node_id + 1 << "[label = \"<f0> const|<f1> int|<f2> ConstDefList|<f3> ;\"];" << endl;
@@ -300,6 +315,12 @@ void Exp::print(int parent, string part) {
 }
 
 void AddExp::print(int parent, string part) {
+    if (err_empty) {
+        cout << "node" << node_id << "[label = \"<f0> Error AddExp\"];" << endl;
+        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        node_id++;
+        return;
+    }
     if (addExpType == AddExpType::AddMulExp) {
         cout << "node" << node_id << "[label = \"<f0> AddExp|<f1> " << op << "|<f2> MulExp\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
@@ -405,7 +426,7 @@ void Cond::print(int parent, string part) {
 
 void LOrExp::print(int parent, string part) {
     if (lOrExpType == LOrExpType::LOrLAndExp) {
-        cout << "node" << node_id << "[label = \"<f0> LOrExp|<f1> |||<f2> LAndExp\"];" << endl;
+        cout << "node" << node_id << "[label = \"<f0> LOrExp|<f1> \\|\\||<f2> LAndExp\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
         int parent_id = node_id;
         node_id++;
@@ -467,8 +488,8 @@ void RelExp::print(int parent, string part) {
 void FuncDef::print(int parent, string part) {
     cout << "node" << node_id << "[label = \"<f0> FuncDef\"];" << endl;
     cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-    if (funcFParamList == nullptr) {
-        cout << "node" << node_id + 1 << "[label = \"<f0> FuncType|<f1> " << ident << "|<f2> ()|<f3> Block\"];" << endl;
+    if (err_empty) {
+        cout << "node" << node_id + 1 << "[label = \"<f0> FuncType|<f1> " << ident << "|<f2> (Unknown funcfparamlist)|<f3> Block\"];" << endl;
         cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
         node_id++;
         int parent_id = node_id++;
@@ -476,13 +497,23 @@ void FuncDef::print(int parent, string part) {
         this->block->print(parent_id, "f3");
     }
     else {
-        cout << "node" << node_id + 1 << "[label = \"<f0> FuncType|<f1> " << ident << "|<f2> (|<f3> FuncFParamList|<f4> )|<f5> Block\"];" << endl;
-        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
-        node_id++;
-        int parent_id = node_id++;
-        this->funcType->print(parent_id, "f0");
-        this->funcFParamList->print(parent_id, "f1");
-        this->block->print(parent_id, "f5");
+        if (funcFParamList == nullptr) {
+            cout << "node" << node_id + 1 << "[label = \"<f0> FuncType|<f1> " << ident << "|<f2> ()|<f3> Block\"];" << endl;
+            cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+            node_id++;
+            int parent_id = node_id++;
+            this->funcType->print(parent_id, "f0");
+            this->block->print(parent_id, "f3");
+        }
+        else {
+            cout << "node" << node_id + 1 << "[label = \"<f0> FuncType|<f1> " << ident << "|<f2> (|<f3> FuncFParamList|<f4> )|<f5> Block\"];" << endl;
+            cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+            node_id++;
+            int parent_id = node_id++;
+            this->funcType->print(parent_id, "f0");
+            this->funcFParamList->print(parent_id, "f1");
+            this->block->print(parent_id, "f5");
+        }
     }
 }
 
@@ -511,6 +542,12 @@ void FuncFParamList::print(int parent, string part) {
 void FuncFParam::print(int parent, string part) {
     cout << "node" << node_id << "[label = \"<f0> FuncFParam\"];" << endl;
     cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+    if (err_empty) {
+        cout << "node" << node_id + 1 << "[label = \"<f0> Error FuncFParam\"];" << endl;
+        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
+        node_id += 2;
+        return;
+    }
     if (varKind == VarKind::Var) {
         cout << "node" << node_id + 1 << "[label = \"<f0> int|<f1> " << ident << "\"];" << endl;
         cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;

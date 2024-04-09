@@ -108,6 +108,12 @@ ConstDecl
     constDecl->constDefList = shared_ptr<ConstDefList>((ConstDefList* )$3);
     $$ = constDecl;
 }
+| CONST VarType IDENT ';' {
+    fprintf(stderr, "Error: Unknown constdeflist\n");
+    auto constDecl = new ConstDecl();
+    constDecl->err_empty = true;
+    $$ = constDecl;
+}
 
 ConstDefList
 : ConstDef {
@@ -176,6 +182,13 @@ VarDecl
     varDecl->varDefList = shared_ptr<VarDefList>((VarDefList* )$2);
     $$ = varDecl;
 }
+| error VarDefList ';' {
+    fprintf(stderr, "Error: Unknown VarType\n");
+    auto varDecl = new VarDecl();
+    varDecl->varDefList = shared_ptr<VarDefList>((VarDefList* )$2);
+    varDecl->unknownType = true;
+    $$ = varDecl;
+}
 
 VarDefList
 : VarDef {
@@ -217,6 +230,38 @@ VarDef
     varDef->ident = *($1);
     varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$2);
     varDef->initVal = shared_ptr<InitVal>((InitVal* )$4);
+    $$ = varDef;
+}
+| INTCONST IDENT {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Var;
+    varDef->ident = *($2);
+    $$ = varDef;
+}
+| INTCONST IDENT '=' InitVal {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Var;
+    varDef->ident = *($2);
+    varDef->initVal = shared_ptr<InitVal>((InitVal* )$4);
+    $$ = varDef;
+}
+| INTCONST IDENT ConstArrayIndex {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Array;
+    varDef->ident = *($2);
+    varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$3);
+    $$ = varDef;
+}
+| INTCONST IDENT ConstArrayIndex '=' InitVal {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Array;
+    varDef->ident = *($2);
+    varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$3);
+    varDef->initVal = shared_ptr<InitVal>((InitVal* )$5);
     $$ = varDef;
 }
 
@@ -281,6 +326,15 @@ FuncDef
     funcDef->block = shared_ptr<Block>((Block* )$6);
     $$ = funcDef;
 }
+| FuncType IDENT LPAREN error RPAREN Block {
+    fprintf(stderr, "Error: Unknown funcfparamlist\n");
+    auto funcDef = new FuncDef();
+    funcDef->funcType = shared_ptr<FuncType>((FuncType* )$1);
+    funcDef->ident = *($2);
+    funcDef->block = shared_ptr<Block>((Block* )$6);
+    funcDef->err_empty = true;
+    $$ = funcDef;
+}
 
 VarType
 : INT {
@@ -335,6 +389,15 @@ FuncFParam
     funcFParam->varType = shared_ptr<VarType>((VarType* )$1);
     funcFParam->ident = *($2);
     funcFParam->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$5);
+    $$ = funcFParam;
+}
+| VarType IDENT LEFTSQB error RIGHTSQB {
+    fprintf(stderr, "Error: Unknown function param\n");
+    auto funcFParam = new FuncFParam();
+    funcFParam->varKind = VarKind::Var;
+    funcFParam->varType = shared_ptr<VarType>((VarType* )$1);
+    funcFParam->ident = *($2);
+    funcFParam->err_empty = true;
     $$ = funcFParam;
 }
 
@@ -636,6 +699,18 @@ RelExp
     relExp->op = "\\<";
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
     $$ = relExp;
+}
+| RelExp '<' error {
+    fprintf(stderr, "Error: Unknown operator\n");
+    auto relExp = new RelExp();
+    relExp->relExpType = RelExpType::RelAddExp;
+    relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
+    relExp->op = "\\<";
+    auto addExp = new AddExp();
+    addExp->err_empty = true;
+    relExp->add_exp = shared_ptr<AddExp>(addExp);
+    $$ = relExp;
+
 }
 | RelExp '>' AddExp {
     auto relExp = new RelExp();

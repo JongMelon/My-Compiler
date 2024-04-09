@@ -508,18 +508,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  14
+#define YYFINAL  19
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   244
+#define YYLAST   274
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  37
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  40
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  97
+#define YYNRULES  106
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  173
+#define YYNSTATES  191
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   280
@@ -572,15 +572,16 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,    53,    53,    64,    69,    78,    84,    91,    97,   105,
-     113,   118,   126,   133,   143,   148,   153,   161,   166,   174,
-     181,   186,   194,   200,   207,   214,   224,   229,   237,   243,
-     248,   256,   261,   269,   276,   286,   293,   298,   305,   310,
-     318,   325,   332,   342,   347,   355,   359,   366,   371,   379,
-     385,   393,   400,   405,   411,   417,   424,   432,   439,   444,
-     449,   454,   462,   469,   476,   483,   489,   498,   504,   510,
-     518,   524,   530,   537,   546,   549,   552,   557,   562,   570,
-     576,   584,   592,   602,   608,   616,   626,   632,   640,   648,
-     656,   666,   672,   680,   690,   696,   705,   711
+     111,   119,   124,   132,   139,   149,   154,   159,   167,   172,
+     180,   185,   194,   199,   207,   213,   220,   227,   235,   242,
+     250,   258,   269,   274,   282,   288,   293,   301,   306,   314,
+     321,   329,   340,   347,   352,   359,   364,   372,   379,   386,
+     394,   405,   410,   418,   422,   429,   434,   442,   448,   456,
+     463,   468,   474,   480,   487,   495,   502,   507,   512,   517,
+     525,   532,   539,   546,   552,   561,   567,   573,   581,   587,
+     593,   600,   609,   612,   615,   620,   625,   633,   639,   647,
+     655,   665,   671,   679,   689,   695,   703,   715,   723,   731,
+     741,   747,   755,   765,   771,   780,   786
 };
 #endif
 
@@ -617,12 +618,12 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-144)
+#define YYPACT_NINF (-158)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
 
-#define YYTABLE_NINF (-1)
+#define YYTABLE_NINF (-56)
 
 #define yytable_value_is_error(Yyn) \
   0
@@ -631,24 +632,26 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      83,    13,  -144,  -144,     9,    83,  -144,  -144,  -144,  -144,
-    -144,    16,  -144,    35,  -144,  -144,    -1,    -9,    37,     5,
-      39,    42,   217,     4,   181,    17,  -144,    61,   193,    18,
-    -144,    35,    -2,  -144,   217,  -144,  -144,  -144,    64,  -144,
-    -144,  -144,  -144,   217,    97,     2,    73,    82,    77,    68,
-     157,  -144,  -144,   217,   181,    45,  -144,   169,  -144,  -144,
-     193,  -144,   217,   205,    99,    80,  -144,  -144,   217,   217,
-     217,   217,   217,    96,  -144,   104,    73,    13,  -144,    94,
-      92,   109,  -144,  -144,   101,   111,  -144,   116,  -144,   120,
-     115,   217,  -144,  -144,  -144,  -144,    97,    97,   123,   134,
-     126,   128,   145,  -144,  -144,  -144,    61,  -144,   140,   133,
-    -144,   135,   122,   148,  -144,  -144,   181,  -144,  -144,   193,
-    -144,  -144,   217,  -144,   152,   217,   217,  -144,  -144,  -144,
-     142,  -144,  -144,  -144,   217,   155,  -144,  -144,  -144,  -144,
-     162,     2,   102,    43,   147,   146,   174,  -144,   164,    99,
-      53,   217,   217,   217,   217,   217,   217,   217,   217,    53,
-    -144,   180,     2,     2,     2,     2,   102,   102,    43,   147,
-    -144,    53,  -144
+      10,   120,    22,  -158,  -158,    33,   255,  -158,  -158,  -158,
+    -158,  -158,   136,    48,    59,    34,    40,  -158,    63,  -158,
+    -158,    42,    71,   233,   209,    50,    52,  -158,   120,    61,
+      86,    96,    56,  -158,     7,  -158,   233,  -158,  -158,  -158,
+      70,  -158,  -158,  -158,  -158,   233,    82,    -5,   185,  -158,
+    -158,   233,   209,   209,    57,  -158,  -158,   221,    79,  -158,
+     124,   127,   138,   153,   159,   157,   233,    81,   176,   175,
+    -158,  -158,   233,   233,   233,   233,   233,  -158,   167,   148,
+     182,  -158,  -158,   209,   197,  -158,  -158,   221,    93,  -158,
+     138,   109,  -158,   193,   138,    22,   184,  -158,   181,   194,
+     233,  -158,  -158,  -158,  -158,    82,    82,   209,  -158,  -158,
+    -158,  -158,   186,   200,  -158,  -158,   205,   207,   199,   202,
+     121,  -158,  -158,  -158,   120,  -158,   214,   150,  -158,   206,
+     196,    19,  -158,  -158,  -158,   233,  -158,   223,  -158,   221,
+    -158,   233,   233,  -158,  -158,  -158,   211,  -158,  -158,  -158,
+     233,   228,   231,  -158,  -158,  -158,   230,    -5,   114,   139,
+     215,   217,   240,  -158,   232,  -158,   176,   173,    68,   233,
+     233,   233,   233,   233,   233,   233,   173,  -158,   244,  -158,
+      -5,    -5,    -5,    -5,   114,   114,   139,   215,  -158,   173,
+    -158
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -656,157 +659,169 @@ static const yytype_int16 yypact[] =
    means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     0,    37,    36,     0,     2,     3,     5,     7,     8,
-       6,     0,    35,     0,     1,     4,    22,     0,    20,     0,
-       0,    10,     0,     0,     0,    24,    19,     0,     0,     0,
-       9,     0,    65,    69,     0,    74,    75,    76,     0,    62,
-      68,    70,    79,     0,    83,    63,     0,     0,     0,    38,
-       0,    23,    28,     0,     0,    22,    21,     0,    12,    14,
-       0,    11,     0,     0,    66,     0,    26,    73,     0,     0,
-       0,     0,     0,     0,    33,    40,     0,     0,    29,    31,
-       0,     0,    25,    15,    17,     0,    13,     0,    71,    77,
-       0,     0,    67,    80,    81,    82,    84,    85,     0,     0,
-       0,     0,     0,    45,    52,    49,     0,    54,     0,    47,
-      50,     0,    68,     0,    34,    39,     0,    30,    27,     0,
-      16,    43,     0,    72,     0,     0,     0,    58,    59,    60,
-       0,    46,    48,    53,     0,    41,    32,    18,    78,    44,
-       0,    86,    91,    94,    96,    64,     0,    61,     0,    42,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-      51,    55,    87,    88,    89,    90,    92,    93,    95,    97,
-      57,     0,    56
+       0,     0,     0,    44,    43,     0,     0,     3,     5,     7,
+       8,     6,     0,    24,     0,     0,    22,    42,     0,     1,
+       4,    24,     0,     0,     0,    26,    28,    21,     0,     0,
+       0,    11,     0,    20,    73,    77,     0,    82,    83,    84,
+       0,    70,    76,    78,    87,     0,    91,    71,     0,    25,
+      34,     0,     0,     0,    30,    23,    10,     0,     0,     9,
+       0,     0,     0,     0,     0,    45,     0,     0,    74,     0,
+      32,    81,     0,     0,     0,     0,     0,    35,    37,     0,
+       0,    27,    29,     0,     0,    13,    15,     0,     0,    12,
+       0,     0,    39,    47,     0,     0,     0,    79,    85,     0,
+       0,    75,    88,    89,    90,    92,    93,     0,    36,    33,
+      31,    16,    18,     0,    14,    41,     0,     0,     0,     0,
+       0,    53,    60,    57,     0,    62,     0,     0,    58,     0,
+      76,     0,    40,    46,    51,     0,    80,     0,    38,     0,
+      17,     0,     0,    66,    67,    68,     0,    54,    56,    61,
+       0,     0,    48,    86,    52,    19,     0,    94,   100,   103,
+     105,    72,     0,    69,     0,    50,    49,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,    59,    63,    96,
+      95,    97,    98,    99,   101,   102,   104,   106,    65,     0,
+      64
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-    -144,  -144,  -144,   190,   -72,  -144,   167,  -144,   -26,    81,
-    -144,   176,  -144,   186,   -21,    91,  -144,   209,   -68,   138,
-    -144,    84,   -40,   103,  -144,  -143,   -11,   -24,    98,   -69,
-    -144,   -25,  -144,    95,    12,  -101,   -67,    66,    69,  -144
+    -158,  -158,  -158,   256,   -87,  -158,   203,  -158,   -49,   125,
+    -158,     8,  -158,   -23,   -22,   158,  -158,   264,   -86,   174,
+    -158,   116,   -55,   143,  -158,  -157,     4,   -24,   129,   -90,
+    -158,   -20,  -158,   137,    99,  -124,    15,   100,    98,  -158
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_uint8 yydefgoto[] =
 {
-       0,     4,     5,     6,     7,     8,    20,    21,    84,    85,
-       9,    17,    18,    25,    79,    80,    10,    47,    11,    48,
-      49,    64,   107,   108,   109,   110,    59,    39,   140,    40,
-      41,    42,    43,    90,    44,    45,   142,   143,   144,   145
+       0,     5,     6,     7,     8,     9,    30,    31,   112,   113,
+      10,    22,    16,    25,    78,    79,    11,    63,    12,    64,
+      65,    68,   125,   126,   127,   128,    86,    41,   156,    42,
+      43,    44,    45,    99,    46,    47,   158,   159,   160,   161
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule whose
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_uint8 yytable[] =
+static const yytype_int16 yytable[] =
 {
-      52,   105,    58,    51,   112,   106,    74,   161,    12,    14,
-      65,    38,    62,    22,    63,    23,   170,    12,    67,    22,
-      26,    46,    71,    72,   141,   141,    52,    16,   172,    24,
-      52,    53,    53,    82,    86,    28,   114,   105,    87,    89,
-     112,   106,    81,    93,    94,    95,    19,    54,    60,   111,
-     162,   163,   164,   165,   141,   141,   141,   141,    98,    22,
-      99,   100,   101,   102,    32,    27,    33,   124,    30,    34,
-      31,    73,    55,    35,    36,    24,   155,   156,   130,    66,
-      37,   112,   104,    96,    97,   111,     1,     2,   166,   167,
-     112,    73,    52,    75,    76,     3,    77,    92,    89,     1,
-       2,    98,   112,    99,   100,   101,   102,    32,     3,    33,
-     148,   117,    34,    91,    73,   103,    35,    36,   113,    68,
-      69,    70,   116,    37,   118,   104,   111,   151,   152,   119,
-     120,   121,   123,   153,   154,   111,     1,     2,    98,   125,
-      99,   100,   101,   102,    32,     3,    33,   111,   122,    34,
-     126,    73,   134,    35,    36,   127,    32,   128,    33,   131,
-      37,    34,   104,   135,   133,    35,    36,   139,    32,    62,
-      33,   147,    37,    34,   129,    50,    78,    35,    36,   150,
-      32,   158,    33,   157,    37,    34,   171,    57,    83,    35,
-      36,   159,    32,   160,    33,    15,    37,    34,    61,    50,
-     137,    35,    36,    56,    32,    29,    33,   136,    37,    34,
-      13,    57,   132,    35,    36,   115,    32,   138,    33,   149,
-      37,    34,    88,   168,   146,    35,    36,   169,    32,     0,
-      33,     0,    37,    34,     0,     0,     0,    35,    36,     0,
-       0,     0,     0,     0,    37
+      50,   130,    49,    54,   123,   124,    58,    92,    85,    15,
+     178,     1,    69,     2,     3,    75,    76,   157,   157,   188,
+     151,    66,     4,    67,    50,    71,    17,    40,    50,    50,
+      81,    82,   190,    19,   152,   115,    55,   130,   114,   132,
+     123,   124,    96,    98,   180,   181,   182,   183,   157,   157,
+     157,   157,   102,   103,   104,    80,    23,    61,    32,    50,
+      17,   110,    23,    27,    51,    58,    23,   129,    28,   179,
+      26,    51,    24,    62,    29,    23,   137,   130,    24,    34,
+      52,    35,    53,    50,    36,    70,   130,    83,    37,    38,
+      56,    57,    34,    51,    35,    39,   146,    36,    97,   130,
+      33,    37,    38,   129,    72,    73,    74,    23,    39,    87,
+       1,    98,     2,     3,   116,    59,   117,   118,   119,   120,
+      34,     4,    35,    57,    60,    36,   164,    91,   121,    37,
+      38,    13,    34,    14,    35,    88,    39,    36,   122,   168,
+     169,    37,    38,   129,    90,   170,   171,    21,    39,    14,
+     145,     1,   129,     2,     3,   116,    91,   117,   118,   119,
+     120,    34,     4,    35,    93,   129,    36,   108,    91,   -55,
+      37,    38,   172,   173,   105,   106,    94,    39,   116,   122,
+     117,   118,   119,   120,    34,    95,    35,   184,   185,    36,
+     100,    91,   101,    37,    38,   107,    34,   109,    35,   134,
+      39,    36,   122,    48,    77,    37,    38,   131,    34,   135,
+      35,   136,    39,    36,   139,    84,   111,    37,    38,   140,
+      34,   141,    35,   142,    39,    36,   150,    48,   143,    37,
+      38,   144,    34,   147,    35,   149,    39,    36,   154,    84,
+     163,    37,    38,   165,    34,    66,    35,   167,    39,    36,
+     189,   174,   175,    37,    38,    -2,     1,   176,     2,     3,
+      39,   177,    20,    89,   155,   138,    18,     4,   166,   133,
+     148,   162,   153,   187,   186
 };
 
-static const yytype_int16 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      24,    73,    28,    24,    73,    73,    46,   150,     4,     0,
-      34,    22,    14,    14,    16,    16,   159,     4,    43,    14,
-      29,    17,    20,    21,   125,   126,    50,    11,   171,    30,
-      54,    14,    14,    54,    60,    30,    76,   109,    62,    63,
-     109,   109,    53,    68,    69,    70,    11,    30,    30,    73,
-     151,   152,   153,   154,   155,   156,   157,   158,     5,    14,
-       7,     8,     9,    10,    11,    28,    13,    91,    29,    16,
-      28,    18,    11,    20,    21,    30,    33,    34,   102,    15,
-      27,   150,    29,    71,    72,   109,     3,     4,   155,   156,
-     159,    18,   116,    11,    17,    12,    28,    17,   122,     3,
-       4,     5,   171,     7,     8,     9,    10,    11,    12,    13,
-     134,    19,    16,    14,    18,    19,    20,    21,    14,    22,
-      23,    24,    28,    27,    15,    29,   150,    25,    26,    28,
-      19,    15,    17,    31,    32,   159,     3,     4,     5,    16,
-       7,     8,     9,    10,    11,    12,    13,   171,    28,    16,
-      16,    18,    30,    20,    21,    29,    11,    29,    13,    19,
-      27,    16,    29,    15,    29,    20,    21,    15,    11,    14,
-      13,    29,    27,    16,    29,    18,    19,    20,    21,    17,
-      11,    35,    13,    36,    27,    16,     6,    18,    19,    20,
-      21,    17,    11,    29,    13,     5,    27,    16,    31,    18,
-     119,    20,    21,    27,    11,    19,    13,   116,    27,    16,
-       1,    18,   109,    20,    21,    77,    11,   122,    13,   135,
-      27,    16,    17,   157,   126,    20,    21,   158,    11,    -1,
-      13,    -1,    27,    16,    -1,    -1,    -1,    20,    21,    -1,
-      -1,    -1,    -1,    -1,    27
+      24,    91,    24,    26,    91,    91,    29,    62,    57,     1,
+     167,     1,    36,     3,     4,    20,    21,   141,   142,   176,
+       1,    14,    12,    16,    48,    45,     4,    23,    52,    53,
+      52,    53,   189,     0,    15,    90,    28,   127,    87,    94,
+     127,   127,    66,    67,   168,   169,   170,   171,   172,   173,
+     174,   175,    72,    73,    74,    51,    14,     1,    16,    83,
+       4,    83,    14,    29,    14,    88,    14,    91,    28,     1,
+      11,    14,    30,    17,    11,    14,   100,   167,    30,    11,
+      30,    13,    30,   107,    16,    15,   176,    30,    20,    21,
+      29,    30,    11,    14,    13,    27,   120,    16,    17,   189,
+      29,    20,    21,   127,    22,    23,    24,    14,    27,    30,
+       1,   135,     3,     4,     5,    29,     7,     8,     9,    10,
+      11,    12,    13,    30,    28,    16,   150,    18,    19,    20,
+      21,    11,    11,    13,    13,    11,    27,    16,    29,    25,
+      26,    20,    21,   167,    17,    31,    32,    11,    27,    13,
+      29,     1,   176,     3,     4,     5,    18,     7,     8,     9,
+      10,    11,    12,    13,    11,   189,    16,    19,    18,    19,
+      20,    21,    33,    34,    75,    76,    17,    27,     5,    29,
+       7,     8,     9,    10,    11,    28,    13,   172,   173,    16,
+      14,    18,    17,    20,    21,    28,    11,    15,    13,    15,
+      27,    16,    29,    18,    19,    20,    21,    14,    11,    28,
+      13,    17,    27,    16,    28,    18,    19,    20,    21,    19,
+      11,    16,    13,    16,    27,    16,    30,    18,    29,    20,
+      21,    29,    11,    19,    13,    29,    27,    16,    15,    18,
+      29,    20,    21,    15,    11,    14,    13,    17,    27,    16,
+       6,    36,    35,    20,    21,     0,     1,    17,     3,     4,
+      27,    29,     6,    60,   139,   107,     2,    12,   152,    95,
+     127,   142,   135,   175,   174
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,     3,     4,    12,    38,    39,    40,    41,    42,    47,
-      53,    55,     4,    54,     0,    40,    11,    48,    49,    11,
-      43,    44,    14,    16,    30,    50,    29,    28,    30,    50,
-      29,    28,    11,    13,    16,    20,    21,    27,    63,    64,
-      66,    67,    68,    69,    71,    72,    17,    54,    56,    57,
-      18,    51,    64,    14,    30,    11,    48,    18,    45,    63,
-      30,    43,    14,    16,    58,    64,    15,    68,    22,    23,
-      24,    20,    21,    18,    59,    11,    17,    28,    19,    51,
-      52,    63,    51,    19,    45,    46,    45,    64,    17,    64,
-      70,    14,    17,    68,    68,    68,    71,    71,     5,     7,
-       8,     9,    10,    19,    29,    41,    55,    59,    60,    61,
-      62,    64,    66,    14,    59,    56,    28,    19,    15,    28,
-      19,    15,    28,    17,    64,    16,    16,    29,    29,    29,
-      64,    19,    60,    29,    30,    15,    52,    46,    70,    15,
-      65,    72,    73,    74,    75,    76,    65,    29,    64,    58,
-      17,    25,    26,    31,    32,    33,    34,    36,    35,    17,
-      29,    62,    72,    72,    72,    72,    73,    73,    74,    75,
-      62,     6,    62
+       0,     1,     3,     4,    12,    38,    39,    40,    41,    42,
+      47,    53,    55,    11,    13,    48,    49,     4,    54,     0,
+      40,    11,    48,    14,    30,    50,    11,    29,    28,    11,
+      43,    44,    16,    29,    11,    13,    16,    20,    21,    27,
+      63,    64,    66,    67,    68,    69,    71,    72,    18,    51,
+      64,    14,    30,    30,    50,    48,    29,    30,    50,    29,
+      28,     1,    17,    54,    56,    57,    14,    16,    58,    64,
+      15,    68,    22,    23,    24,    20,    21,    19,    51,    52,
+      63,    51,    51,    30,    18,    45,    63,    30,    11,    43,
+      17,    18,    59,    11,    17,    28,    64,    17,    64,    70,
+      14,    17,    68,    68,    68,    71,    71,    28,    19,    15,
+      51,    19,    45,    46,    45,    59,     5,     7,     8,     9,
+      10,    19,    29,    41,    55,    59,    60,    61,    62,    64,
+      66,    14,    59,    56,    15,    28,    17,    64,    52,    28,
+      19,    16,    16,    29,    29,    29,    64,    19,    60,    29,
+      30,     1,    15,    70,    15,    46,    65,    72,    73,    74,
+      75,    76,    65,    29,    64,    15,    58,    17,    25,    26,
+      31,    32,    33,    34,    36,    35,    17,    29,    62,     1,
+      72,    72,    72,    72,    73,    73,    74,    75,    62,     6,
+      62
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    37,    38,    39,    39,    40,    40,    41,    41,    42,
-      43,    43,    44,    44,    45,    45,    45,    46,    46,    47,
-      48,    48,    49,    49,    49,    49,    50,    50,    51,    51,
-      51,    52,    52,    53,    53,    54,    55,    55,    56,    56,
-      57,    57,    57,    58,    58,    59,    59,    60,    60,    61,
-      61,    62,    62,    62,    62,    62,    62,    62,    62,    62,
-      62,    62,    63,    64,    65,    66,    66,    67,    67,    67,
-      68,    68,    68,    68,    69,    69,    69,    70,    70,    71,
-      71,    71,    71,    72,    72,    72,    73,    73,    73,    73,
-      73,    74,    74,    74,    75,    75,    76,    76
+      42,    43,    43,    44,    44,    45,    45,    45,    46,    46,
+      47,    47,    48,    48,    49,    49,    49,    49,    49,    49,
+      49,    49,    50,    50,    51,    51,    51,    52,    52,    53,
+      53,    53,    54,    55,    55,    56,    56,    57,    57,    57,
+      57,    58,    58,    59,    59,    60,    60,    61,    61,    62,
+      62,    62,    62,    62,    62,    62,    62,    62,    62,    62,
+      63,    64,    65,    66,    66,    67,    67,    67,    68,    68,
+      68,    68,    69,    69,    69,    70,    70,    71,    71,    71,
+      71,    72,    72,    72,    73,    73,    73,    73,    73,    73,
+      74,    74,    74,    75,    75,    76,    76
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     1,     2,     1,     1,     1,     1,     4,
-       1,     3,     3,     4,     1,     2,     3,     1,     3,     3,
-       1,     3,     1,     3,     2,     4,     3,     4,     1,     2,
-       3,     1,     3,     5,     6,     1,     1,     1,     1,     3,
-       2,     4,     5,     3,     4,     2,     3,     1,     2,     1,
-       1,     4,     1,     2,     1,     5,     7,     5,     2,     2,
-       2,     3,     1,     1,     1,     1,     2,     3,     1,     1,
-       1,     3,     4,     2,     1,     1,     1,     1,     3,     1,
-       3,     3,     3,     1,     3,     3,     1,     3,     3,     3,
-       3,     1,     3,     3,     1,     3,     1,     3
+       4,     1,     3,     3,     4,     1,     2,     3,     1,     3,
+       3,     3,     1,     3,     1,     3,     2,     4,     2,     4,
+       3,     5,     3,     4,     1,     2,     3,     1,     3,     5,
+       6,     6,     1,     1,     1,     1,     3,     2,     4,     5,
+       5,     3,     4,     2,     3,     1,     2,     1,     1,     4,
+       1,     2,     1,     5,     7,     5,     2,     2,     2,     3,
+       1,     1,     1,     1,     2,     3,     1,     1,     1,     3,
+       4,     2,     1,     1,     1,     1,     3,     1,     3,     3,
+       3,     1,     3,     3,     1,     3,     3,     3,     3,     3,
+       1,     3,     3,     1,     3,     1,     3
 };
 
 
@@ -1280,7 +1295,7 @@ yyreduce:
     compUnit->print(0, "");
     std::cout << "}" << std::endl;
 }
-#line 1284 "syntax.tab.c"
+#line 1299 "syntax.tab.c"
     break;
 
   case 3: /* CompList: DecOrDef  */
@@ -1290,7 +1305,7 @@ yyreduce:
     compList->declOrDef = shared_ptr<DeclOrDef>((DeclOrDef* )(yyvsp[0].tree));
     (yyval.tree) = compList;
 }
-#line 1294 "syntax.tab.c"
+#line 1309 "syntax.tab.c"
     break;
 
   case 4: /* CompList: CompList DecOrDef  */
@@ -1302,7 +1317,7 @@ yyreduce:
     compList->declOrDef = shared_ptr<DeclOrDef>((DeclOrDef* )(yyvsp[0].tree));
     (yyval.tree) = compList;
 }
-#line 1306 "syntax.tab.c"
+#line 1321 "syntax.tab.c"
     break;
 
   case 5: /* DecOrDef: Decl  */
@@ -1313,7 +1328,7 @@ yyreduce:
     decOrDef->decl = shared_ptr<Decl>((Decl* )(yyvsp[0].tree));
     (yyval.tree) = decOrDef;
 }
-#line 1317 "syntax.tab.c"
+#line 1332 "syntax.tab.c"
     break;
 
   case 6: /* DecOrDef: FuncDef  */
@@ -1323,7 +1338,7 @@ yyreduce:
     decOrDef->funcDef = shared_ptr<FuncDef>((FuncDef* )(yyvsp[0].tree));
     (yyval.tree) = decOrDef;
 }
-#line 1327 "syntax.tab.c"
+#line 1342 "syntax.tab.c"
     break;
 
   case 7: /* Decl: ConstDecl  */
@@ -1334,7 +1349,7 @@ yyreduce:
     decl->constDecl = shared_ptr<ConstDecl>((ConstDecl* )(yyvsp[0].tree));
     (yyval.tree) = decl;
 }
-#line 1338 "syntax.tab.c"
+#line 1353 "syntax.tab.c"
     break;
 
   case 8: /* Decl: VarDecl  */
@@ -1345,7 +1360,7 @@ yyreduce:
     decl->varDecl = shared_ptr<VarDecl>((VarDecl* )(yyvsp[0].tree));
     (yyval.tree) = decl;
 }
-#line 1349 "syntax.tab.c"
+#line 1364 "syntax.tab.c"
     break;
 
   case 9: /* ConstDecl: CONST VarType ConstDefList ';'  */
@@ -1356,32 +1371,43 @@ yyreduce:
     constDecl->constDefList = shared_ptr<ConstDefList>((ConstDefList* )(yyvsp[-1].tree));
     (yyval.tree) = constDecl;
 }
-#line 1360 "syntax.tab.c"
+#line 1375 "syntax.tab.c"
     break;
 
-  case 10: /* ConstDefList: ConstDef  */
-#line 113 "syntax.y"
+  case 10: /* ConstDecl: CONST VarType IDENT ';'  */
+#line 111 "syntax.y"
+                          {
+    fprintf(stderr, "Error: Unknown constdeflist\n");
+    auto constDecl = new ConstDecl();
+    constDecl->err_empty = true;
+    (yyval.tree) = constDecl;
+}
+#line 1386 "syntax.tab.c"
+    break;
+
+  case 11: /* ConstDefList: ConstDef  */
+#line 119 "syntax.y"
            {
     auto constDefList = new ConstDefList();
     constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )(yyvsp[0].tree));
     (yyval.tree) = constDefList;
 }
-#line 1370 "syntax.tab.c"
+#line 1396 "syntax.tab.c"
     break;
 
-  case 11: /* ConstDefList: ConstDef ',' ConstDefList  */
-#line 118 "syntax.y"
+  case 12: /* ConstDefList: ConstDef ',' ConstDefList  */
+#line 124 "syntax.y"
                             {
     auto constDefList = new ConstDefList();
     constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )(yyvsp[-2].tree));
     constDefList->constDefList = shared_ptr<ConstDefList>((ConstDefList* )(yyvsp[0].tree));
     (yyval.tree) = constDefList;
 }
-#line 1381 "syntax.tab.c"
+#line 1407 "syntax.tab.c"
     break;
 
-  case 12: /* ConstDef: IDENT '=' ConstInitVal  */
-#line 126 "syntax.y"
+  case 13: /* ConstDef: IDENT '=' ConstInitVal  */
+#line 132 "syntax.y"
                          {
     auto constDef = new ConstDef();
     constDef->varKind = VarKind::Var;
@@ -1389,11 +1415,11 @@ yyreduce:
     constDef->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )(yyvsp[0].tree));
     (yyval.tree) = constDef;
 }
-#line 1393 "syntax.tab.c"
+#line 1419 "syntax.tab.c"
     break;
 
-  case 13: /* ConstDef: IDENT ConstArrayIndex '=' ConstInitVal  */
-#line 133 "syntax.y"
+  case 14: /* ConstDef: IDENT ConstArrayIndex '=' ConstInitVal  */
+#line 139 "syntax.y"
                                          {
     auto constDef = new ConstDef();
     constDef->varKind = VarKind::Array;
@@ -1402,105 +1428,117 @@ yyreduce:
     constDef->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )(yyvsp[0].tree));
     (yyval.tree) = constDef;
 }
-#line 1406 "syntax.tab.c"
+#line 1432 "syntax.tab.c"
     break;
 
-  case 14: /* ConstInitVal: ConstExp  */
-#line 143 "syntax.y"
+  case 15: /* ConstInitVal: ConstExp  */
+#line 149 "syntax.y"
            {
     auto constInitVal = new ConstInitVal();
     constInitVal->constExp = shared_ptr<ConstExp>((ConstExp* )(yyvsp[0].tree));
     (yyval.tree) = constInitVal;
 }
-#line 1416 "syntax.tab.c"
+#line 1442 "syntax.tab.c"
     break;
 
-  case 15: /* ConstInitVal: LEFTBRACE RIGHTBRACE  */
-#line 148 "syntax.y"
+  case 16: /* ConstInitVal: LEFTBRACE RIGHTBRACE  */
+#line 154 "syntax.y"
                        {
     auto constInitVal = new ConstInitVal();
     constInitVal->varKind = VarKind::Array;
     (yyval.tree) = constInitVal;
 }
-#line 1426 "syntax.tab.c"
+#line 1452 "syntax.tab.c"
     break;
 
-  case 16: /* ConstInitVal: LEFTBRACE ConstInitValList RIGHTBRACE  */
-#line 153 "syntax.y"
+  case 17: /* ConstInitVal: LEFTBRACE ConstInitValList RIGHTBRACE  */
+#line 159 "syntax.y"
                                         {
     auto constInitVal = new ConstInitVal();
     constInitVal->varKind = VarKind::Array;
     constInitVal->constInitValList = shared_ptr<ConstInitValList>((ConstInitValList* )(yyvsp[-1].tree));
     (yyval.tree) = constInitVal;
 }
-#line 1437 "syntax.tab.c"
+#line 1463 "syntax.tab.c"
     break;
 
-  case 17: /* ConstInitValList: ConstInitVal  */
-#line 161 "syntax.y"
+  case 18: /* ConstInitValList: ConstInitVal  */
+#line 167 "syntax.y"
                {
     auto constInitValList = new ConstInitValList();
     constInitValList->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )(yyvsp[0].tree));
     (yyval.tree) = constInitValList;
 }
-#line 1447 "syntax.tab.c"
+#line 1473 "syntax.tab.c"
     break;
 
-  case 18: /* ConstInitValList: ConstInitVal ',' ConstInitValList  */
-#line 166 "syntax.y"
+  case 19: /* ConstInitValList: ConstInitVal ',' ConstInitValList  */
+#line 172 "syntax.y"
                                     {
     auto constInitValList = new ConstInitValList();
     constInitValList->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )(yyvsp[-2].tree));
     constInitValList->constInitValList = shared_ptr<ConstInitValList>((ConstInitValList* )(yyvsp[0].tree));
     (yyval.tree) = constInitValList;
 }
-#line 1458 "syntax.tab.c"
+#line 1484 "syntax.tab.c"
     break;
 
-  case 19: /* VarDecl: FuncType VarDefList ';'  */
-#line 174 "syntax.y"
+  case 20: /* VarDecl: FuncType VarDefList ';'  */
+#line 180 "syntax.y"
                           {
     auto varDecl = new VarDecl();
     varDecl->varDefList = shared_ptr<VarDefList>((VarDefList* )(yyvsp[-1].tree));
     (yyval.tree) = varDecl;
 }
-#line 1468 "syntax.tab.c"
+#line 1494 "syntax.tab.c"
     break;
 
-  case 20: /* VarDefList: VarDef  */
-#line 181 "syntax.y"
+  case 21: /* VarDecl: error VarDefList ';'  */
+#line 185 "syntax.y"
+                       {
+    fprintf(stderr, "Error: Unknown VarType\n");
+    auto varDecl = new VarDecl();
+    varDecl->varDefList = shared_ptr<VarDefList>((VarDefList* )(yyvsp[-1].tree));
+    varDecl->unknownType = true;
+    (yyval.tree) = varDecl;
+}
+#line 1506 "syntax.tab.c"
+    break;
+
+  case 22: /* VarDefList: VarDef  */
+#line 194 "syntax.y"
          {
     auto varDefList = new VarDefList();
     varDefList->varDef = shared_ptr<VarDef>((VarDef* )(yyvsp[0].tree));
     (yyval.tree) = varDefList;
 }
-#line 1478 "syntax.tab.c"
+#line 1516 "syntax.tab.c"
     break;
 
-  case 21: /* VarDefList: VarDef ',' VarDefList  */
-#line 186 "syntax.y"
+  case 23: /* VarDefList: VarDef ',' VarDefList  */
+#line 199 "syntax.y"
                         {
     auto varDefList = new VarDefList();
     varDefList->varDef = shared_ptr<VarDef>((VarDef* )(yyvsp[-2].tree));
     varDefList->varDefList = shared_ptr<VarDefList>((VarDefList* )(yyvsp[0].tree));
     (yyval.tree) = varDefList;
 }
-#line 1489 "syntax.tab.c"
+#line 1527 "syntax.tab.c"
     break;
 
-  case 22: /* VarDef: IDENT  */
-#line 194 "syntax.y"
+  case 24: /* VarDef: IDENT  */
+#line 207 "syntax.y"
         {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Var;
     varDef->ident = *((yyvsp[0].sval));
     (yyval.tree) = varDef;
 }
-#line 1500 "syntax.tab.c"
+#line 1538 "syntax.tab.c"
     break;
 
-  case 23: /* VarDef: IDENT '=' InitVal  */
-#line 200 "syntax.y"
+  case 25: /* VarDef: IDENT '=' InitVal  */
+#line 213 "syntax.y"
                     {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Var;
@@ -1508,11 +1546,11 @@ yyreduce:
     varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1512 "syntax.tab.c"
+#line 1550 "syntax.tab.c"
     break;
 
-  case 24: /* VarDef: IDENT ConstArrayIndex  */
-#line 207 "syntax.y"
+  case 26: /* VarDef: IDENT ConstArrayIndex  */
+#line 220 "syntax.y"
                         {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Array;
@@ -1520,11 +1558,11 @@ yyreduce:
     varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1524 "syntax.tab.c"
+#line 1562 "syntax.tab.c"
     break;
 
-  case 25: /* VarDef: IDENT ConstArrayIndex '=' InitVal  */
-#line 214 "syntax.y"
+  case 27: /* VarDef: IDENT ConstArrayIndex '=' InitVal  */
+#line 227 "syntax.y"
                                     {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Array;
@@ -1533,85 +1571,137 @@ yyreduce:
     varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1537 "syntax.tab.c"
+#line 1575 "syntax.tab.c"
     break;
 
-  case 26: /* ConstArrayIndex: LEFTSQB ConstExp RIGHTSQB  */
-#line 224 "syntax.y"
+  case 28: /* VarDef: INTCONST IDENT  */
+#line 235 "syntax.y"
+                 {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Var;
+    varDef->ident = *((yyvsp[0].sval));
+    (yyval.tree) = varDef;
+}
+#line 1587 "syntax.tab.c"
+    break;
+
+  case 29: /* VarDef: INTCONST IDENT '=' InitVal  */
+#line 242 "syntax.y"
+                             {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Var;
+    varDef->ident = *((yyvsp[-2].sval));
+    varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
+    (yyval.tree) = varDef;
+}
+#line 1600 "syntax.tab.c"
+    break;
+
+  case 30: /* VarDef: INTCONST IDENT ConstArrayIndex  */
+#line 250 "syntax.y"
+                                 {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Array;
+    varDef->ident = *((yyvsp[-1].sval));
+    varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )(yyvsp[0].tree));
+    (yyval.tree) = varDef;
+}
+#line 1613 "syntax.tab.c"
+    break;
+
+  case 31: /* VarDef: INTCONST IDENT ConstArrayIndex '=' InitVal  */
+#line 258 "syntax.y"
+                                             {
+    fprintf(stderr, "Error: Invaild ident name\n");
+    auto varDef = new VarDef();
+    varDef->varKind = VarKind::Array;
+    varDef->ident = *((yyvsp[-3].sval));
+    varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )(yyvsp[-2].tree));
+    varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
+    (yyval.tree) = varDef;
+}
+#line 1627 "syntax.tab.c"
+    break;
+
+  case 32: /* ConstArrayIndex: LEFTSQB ConstExp RIGHTSQB  */
+#line 269 "syntax.y"
                             {
     auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->const_exp = shared_ptr<ConstExp>((ConstExp* )(yyvsp[-1].tree));
     (yyval.tree) = constArrayIndex;
 }
-#line 1547 "syntax.tab.c"
+#line 1637 "syntax.tab.c"
     break;
 
-  case 27: /* ConstArrayIndex: ConstArrayIndex LEFTSQB ConstExp RIGHTSQB  */
-#line 229 "syntax.y"
+  case 33: /* ConstArrayIndex: ConstArrayIndex LEFTSQB ConstExp RIGHTSQB  */
+#line 274 "syntax.y"
                                             {
     auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )(yyvsp[-3].tree));
     constArrayIndex->const_exp = shared_ptr<ConstExp>((ConstExp* )(yyvsp[-1].tree));
     (yyval.tree) = constArrayIndex;
 }
-#line 1558 "syntax.tab.c"
+#line 1648 "syntax.tab.c"
     break;
 
-  case 28: /* InitVal: Exp  */
-#line 237 "syntax.y"
+  case 34: /* InitVal: Exp  */
+#line 282 "syntax.y"
       {
     auto initVal = new InitVal();
     initVal->varKind = VarKind::Var;
     initVal->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = initVal;
 }
-#line 1569 "syntax.tab.c"
+#line 1659 "syntax.tab.c"
     break;
 
-  case 29: /* InitVal: LEFTBRACE RIGHTBRACE  */
-#line 243 "syntax.y"
+  case 35: /* InitVal: LEFTBRACE RIGHTBRACE  */
+#line 288 "syntax.y"
                        {
     auto initVal = new InitVal();
     initVal->varKind = VarKind::Array;
     (yyval.tree) = initVal;
 }
-#line 1579 "syntax.tab.c"
+#line 1669 "syntax.tab.c"
     break;
 
-  case 30: /* InitVal: LEFTBRACE InitValList RIGHTBRACE  */
-#line 248 "syntax.y"
+  case 36: /* InitVal: LEFTBRACE InitValList RIGHTBRACE  */
+#line 293 "syntax.y"
                                    {
     auto initVal = new InitVal();
     initVal->varKind = VarKind::Array;
     initVal->initValList = shared_ptr<InitValList>((InitValList* )(yyvsp[-1].tree));
     (yyval.tree) = initVal;
 }
-#line 1590 "syntax.tab.c"
+#line 1680 "syntax.tab.c"
     break;
 
-  case 31: /* InitValList: InitVal  */
-#line 256 "syntax.y"
+  case 37: /* InitValList: InitVal  */
+#line 301 "syntax.y"
           {
     auto initValList = new InitValList();
     initValList->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = initValList;
 }
-#line 1600 "syntax.tab.c"
+#line 1690 "syntax.tab.c"
     break;
 
-  case 32: /* InitValList: InitVal ',' InitValList  */
-#line 261 "syntax.y"
+  case 38: /* InitValList: InitVal ',' InitValList  */
+#line 306 "syntax.y"
                           {
     auto initValList = new InitValList();
     initValList->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[-2].tree));
     initValList->initValList = shared_ptr<InitValList>((InitValList* )(yyvsp[0].tree));
     (yyval.tree) = initValList;
 }
-#line 1611 "syntax.tab.c"
+#line 1701 "syntax.tab.c"
     break;
 
-  case 33: /* FuncDef: FuncType IDENT LPAREN RPAREN Block  */
-#line 269 "syntax.y"
+  case 39: /* FuncDef: FuncType IDENT LPAREN RPAREN Block  */
+#line 314 "syntax.y"
                                      {
     auto funcDef = new FuncDef();
     funcDef->funcType = shared_ptr<FuncType>((FuncType* )(yyvsp[-4].tree));
@@ -1619,11 +1709,11 @@ yyreduce:
     funcDef->block = shared_ptr<Block>((Block* )(yyvsp[0].tree));
     (yyval.tree) = funcDef;
 }
-#line 1623 "syntax.tab.c"
+#line 1713 "syntax.tab.c"
     break;
 
-  case 34: /* FuncDef: FuncType IDENT LPAREN FuncFParamList RPAREN Block  */
-#line 276 "syntax.y"
+  case 40: /* FuncDef: FuncType IDENT LPAREN FuncFParamList RPAREN Block  */
+#line 321 "syntax.y"
                                                     {
     auto funcDef = new FuncDef();
     funcDef->funcType = shared_ptr<FuncType>((FuncType* )(yyvsp[-5].tree));
@@ -1632,62 +1722,76 @@ yyreduce:
     funcDef->block = shared_ptr<Block>((Block* )(yyvsp[0].tree));
     (yyval.tree) = funcDef;
 }
-#line 1636 "syntax.tab.c"
+#line 1726 "syntax.tab.c"
     break;
 
-  case 35: /* VarType: INT  */
-#line 286 "syntax.y"
+  case 41: /* FuncDef: FuncType IDENT LPAREN error RPAREN Block  */
+#line 329 "syntax.y"
+                                           {
+    fprintf(stderr, "Error: Unknown funcfparamlist\n");
+    auto funcDef = new FuncDef();
+    funcDef->funcType = shared_ptr<FuncType>((FuncType* )(yyvsp[-5].tree));
+    funcDef->ident = *((yyvsp[-4].sval));
+    funcDef->block = shared_ptr<Block>((Block* )(yyvsp[0].tree));
+    funcDef->err_empty = true;
+    (yyval.tree) = funcDef;
+}
+#line 1740 "syntax.tab.c"
+    break;
+
+  case 42: /* VarType: INT  */
+#line 340 "syntax.y"
       {
     auto varType = new VarType();
     varType->type = "int";
     (yyval.tree) = varType;
 }
-#line 1646 "syntax.tab.c"
+#line 1750 "syntax.tab.c"
     break;
 
-  case 36: /* FuncType: VOID  */
-#line 293 "syntax.y"
+  case 43: /* FuncType: VOID  */
+#line 347 "syntax.y"
        {
     auto funcType = new FuncType();
     funcType->type = "void";
     (yyval.tree) = funcType;
 }
-#line 1656 "syntax.tab.c"
+#line 1760 "syntax.tab.c"
     break;
 
-  case 37: /* FuncType: INT  */
-#line 298 "syntax.y"
+  case 44: /* FuncType: INT  */
+#line 352 "syntax.y"
       {
     auto funcType = new FuncType();
     funcType->type = "int";
     (yyval.tree) = funcType;
 }
-#line 1666 "syntax.tab.c"
+#line 1770 "syntax.tab.c"
     break;
 
-  case 38: /* FuncFParamList: FuncFParam  */
-#line 305 "syntax.y"
+  case 45: /* FuncFParamList: FuncFParam  */
+#line 359 "syntax.y"
              {
     auto funcFParamList = new FuncFParamList();
     funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )(yyvsp[0].tree));
     (yyval.tree) = funcFParamList;
 }
-#line 1676 "syntax.tab.c"
+#line 1780 "syntax.tab.c"
     break;
 
-  case 39: /* FuncFParamList: FuncFParam ',' FuncFParamList  */
-#line 310 "syntax.y"
+  case 46: /* FuncFParamList: FuncFParam ',' FuncFParamList  */
+#line 364 "syntax.y"
                                 {
     auto funcFParamList = new FuncFParamList();
     funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )(yyvsp[-2].tree));
     funcFParamList->funcFParamList = shared_ptr<FuncFParamList>((FuncFParamList* )(yyvsp[0].tree));
     (yyval.tree) = funcFParamList;
 }
-#line 1687 "syntax.tab.c"
+#line 1791 "syntax.tab.c"
     break;
 
-  case 40: /* FuncFParam: VarType IDENT  */
-#line 318 "syntax.y"
+  case 47: /* FuncFParam: VarType IDENT  */
+#line 372 "syntax.y"
                 {
     auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Var;
@@ -1695,11 +1799,11 @@ yyreduce:
     funcFParam->ident = *((yyvsp[0].sval));
     (yyval.tree) = funcFParam;
 }
-#line 1699 "syntax.tab.c"
+#line 1803 "syntax.tab.c"
     break;
 
-  case 41: /* FuncFParam: VarType IDENT LEFTSQB RIGHTSQB  */
-#line 325 "syntax.y"
+  case 48: /* FuncFParam: VarType IDENT LEFTSQB RIGHTSQB  */
+#line 379 "syntax.y"
                                  {
     auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Array;
@@ -1707,11 +1811,11 @@ yyreduce:
     funcFParam->ident = *((yyvsp[-2].sval));
     (yyval.tree) = funcFParam;
 }
-#line 1711 "syntax.tab.c"
+#line 1815 "syntax.tab.c"
     break;
 
-  case 42: /* FuncFParam: VarType IDENT LEFTSQB RIGHTSQB ArrayIndex  */
-#line 332 "syntax.y"
+  case 49: /* FuncFParam: VarType IDENT LEFTSQB RIGHTSQB ArrayIndex  */
+#line 386 "syntax.y"
                                             {
     auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Array;
@@ -1720,94 +1824,108 @@ yyreduce:
     funcFParam->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = funcFParam;
 }
-#line 1724 "syntax.tab.c"
+#line 1828 "syntax.tab.c"
     break;
 
-  case 43: /* ArrayIndex: LEFTSQB Exp RIGHTSQB  */
-#line 342 "syntax.y"
+  case 50: /* FuncFParam: VarType IDENT LEFTSQB error RIGHTSQB  */
+#line 394 "syntax.y"
+                                       {
+    fprintf(stderr, "Error: Unknown function param\n");
+    auto funcFParam = new FuncFParam();
+    funcFParam->varKind = VarKind::Var;
+    funcFParam->varType = shared_ptr<VarType>((VarType* )(yyvsp[-4].tree));
+    funcFParam->ident = *((yyvsp[-3].sval));
+    funcFParam->err_empty = true;
+    (yyval.tree) = funcFParam;
+}
+#line 1842 "syntax.tab.c"
+    break;
+
+  case 51: /* ArrayIndex: LEFTSQB Exp RIGHTSQB  */
+#line 405 "syntax.y"
                        {
     auto arrayIndex = new ArrayIndex();
     arrayIndex->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = arrayIndex;
 }
-#line 1734 "syntax.tab.c"
+#line 1852 "syntax.tab.c"
     break;
 
-  case 44: /* ArrayIndex: ArrayIndex LEFTSQB Exp RIGHTSQB  */
-#line 347 "syntax.y"
+  case 52: /* ArrayIndex: ArrayIndex LEFTSQB Exp RIGHTSQB  */
+#line 410 "syntax.y"
                                   {
     auto arrayIndex = new ArrayIndex();
     arrayIndex->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )(yyvsp[-3].tree));
     arrayIndex->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = arrayIndex;
 }
-#line 1745 "syntax.tab.c"
+#line 1863 "syntax.tab.c"
     break;
 
-  case 45: /* Block: LEFTBRACE RIGHTBRACE  */
-#line 355 "syntax.y"
+  case 53: /* Block: LEFTBRACE RIGHTBRACE  */
+#line 418 "syntax.y"
                        {
     auto block = new Block();
     (yyval.tree) = block;
 }
-#line 1754 "syntax.tab.c"
+#line 1872 "syntax.tab.c"
     break;
 
-  case 46: /* Block: LEFTBRACE BlockItemList RIGHTBRACE  */
-#line 359 "syntax.y"
+  case 54: /* Block: LEFTBRACE BlockItemList RIGHTBRACE  */
+#line 422 "syntax.y"
                                      {
     auto block = new Block();
     block->blockItemList = shared_ptr<BlockItemList>((BlockItemList* )(yyvsp[-1].tree));
     (yyval.tree) = block;
 }
-#line 1764 "syntax.tab.c"
+#line 1882 "syntax.tab.c"
     break;
 
-  case 47: /* BlockItemList: BlockItem  */
-#line 366 "syntax.y"
+  case 55: /* BlockItemList: BlockItem  */
+#line 429 "syntax.y"
             {
     auto blockItemList = new BlockItemList();
     blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )(yyvsp[0].tree));
     (yyval.tree) = blockItemList;
 }
-#line 1774 "syntax.tab.c"
+#line 1892 "syntax.tab.c"
     break;
 
-  case 48: /* BlockItemList: BlockItem BlockItemList  */
-#line 371 "syntax.y"
+  case 56: /* BlockItemList: BlockItem BlockItemList  */
+#line 434 "syntax.y"
                           {
     auto blockItemList = new BlockItemList();
     blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )(yyvsp[-1].tree));
     blockItemList->blockItemList = shared_ptr<BlockItemList>((BlockItemList* )(yyvsp[0].tree));
     (yyval.tree) = blockItemList;
 }
-#line 1785 "syntax.tab.c"
+#line 1903 "syntax.tab.c"
     break;
 
-  case 49: /* BlockItem: Decl  */
-#line 379 "syntax.y"
+  case 57: /* BlockItem: Decl  */
+#line 442 "syntax.y"
        {
     auto blockItem = new BlockItem();
     blockItem->blockItemType = BlockItemType::Decl;
     blockItem->decl = shared_ptr<Decl>((Decl* )(yyvsp[0].tree));
     (yyval.tree) = blockItem;
 }
-#line 1796 "syntax.tab.c"
+#line 1914 "syntax.tab.c"
     break;
 
-  case 50: /* BlockItem: Stmt  */
-#line 385 "syntax.y"
+  case 58: /* BlockItem: Stmt  */
+#line 448 "syntax.y"
        {
     auto blockItem = new BlockItem();
     blockItem->blockItemType = BlockItemType::Stmt;
     blockItem->stmt = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = blockItem;
 }
-#line 1807 "syntax.tab.c"
+#line 1925 "syntax.tab.c"
     break;
 
-  case 51: /* Stmt: LVal '=' Exp ';'  */
-#line 393 "syntax.y"
+  case 59: /* Stmt: LVal '=' Exp ';'  */
+#line 456 "syntax.y"
                    {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Assign;
@@ -1815,43 +1933,43 @@ yyreduce:
     stmt->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = stmt;
 }
-#line 1819 "syntax.tab.c"
+#line 1937 "syntax.tab.c"
     break;
 
-  case 52: /* Stmt: ';'  */
-#line 400 "syntax.y"
+  case 60: /* Stmt: ';'  */
+#line 463 "syntax.y"
       {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Empty;
     (yyval.tree) = stmt;
 }
-#line 1829 "syntax.tab.c"
+#line 1947 "syntax.tab.c"
     break;
 
-  case 53: /* Stmt: Exp ';'  */
-#line 405 "syntax.y"
+  case 61: /* Stmt: Exp ';'  */
+#line 468 "syntax.y"
           {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Exp;
     stmt->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = stmt;
 }
-#line 1840 "syntax.tab.c"
+#line 1958 "syntax.tab.c"
     break;
 
-  case 54: /* Stmt: Block  */
-#line 411 "syntax.y"
+  case 62: /* Stmt: Block  */
+#line 474 "syntax.y"
         {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Block;
     stmt->block = shared_ptr<Block>((Block* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 1851 "syntax.tab.c"
+#line 1969 "syntax.tab.c"
     break;
 
-  case 55: /* Stmt: IF LPAREN Cond RPAREN Stmt  */
-#line 417 "syntax.y"
+  case 63: /* Stmt: IF LPAREN Cond RPAREN Stmt  */
+#line 480 "syntax.y"
                              {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::If;
@@ -1859,11 +1977,11 @@ yyreduce:
     stmt->stmt_if = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 1863 "syntax.tab.c"
+#line 1981 "syntax.tab.c"
     break;
 
-  case 56: /* Stmt: IF LPAREN Cond RPAREN Stmt ELSE Stmt  */
-#line 424 "syntax.y"
+  case 64: /* Stmt: IF LPAREN Cond RPAREN Stmt ELSE Stmt  */
+#line 487 "syntax.y"
                                        {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::IfElse;
@@ -1872,11 +1990,11 @@ yyreduce:
     stmt->stmt_if_else = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 1876 "syntax.tab.c"
+#line 1994 "syntax.tab.c"
     break;
 
-  case 57: /* Stmt: WHILE LPAREN Cond RPAREN Stmt  */
-#line 432 "syntax.y"
+  case 65: /* Stmt: WHILE LPAREN Cond RPAREN Stmt  */
+#line 495 "syntax.y"
                                 {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::While;
@@ -1884,93 +2002,93 @@ yyreduce:
     stmt->stmt_while = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 1888 "syntax.tab.c"
+#line 2006 "syntax.tab.c"
     break;
 
-  case 58: /* Stmt: BREAK ';'  */
-#line 439 "syntax.y"
+  case 66: /* Stmt: BREAK ';'  */
+#line 502 "syntax.y"
             {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Break;
     (yyval.tree) = stmt;
 }
-#line 1898 "syntax.tab.c"
+#line 2016 "syntax.tab.c"
     break;
 
-  case 59: /* Stmt: CONTINUE ';'  */
-#line 444 "syntax.y"
+  case 67: /* Stmt: CONTINUE ';'  */
+#line 507 "syntax.y"
                {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Continue;
     (yyval.tree) = stmt;
 }
-#line 1908 "syntax.tab.c"
+#line 2026 "syntax.tab.c"
     break;
 
-  case 60: /* Stmt: RETURN ';'  */
-#line 449 "syntax.y"
+  case 68: /* Stmt: RETURN ';'  */
+#line 512 "syntax.y"
              {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Return;
     (yyval.tree) = stmt;
 }
-#line 1918 "syntax.tab.c"
+#line 2036 "syntax.tab.c"
     break;
 
-  case 61: /* Stmt: RETURN Exp ';'  */
-#line 454 "syntax.y"
+  case 69: /* Stmt: RETURN Exp ';'  */
+#line 517 "syntax.y"
                  {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::ReturnExp;
     stmt->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = stmt;
 }
-#line 1929 "syntax.tab.c"
+#line 2047 "syntax.tab.c"
     break;
 
-  case 62: /* ConstExp: Exp  */
-#line 462 "syntax.y"
+  case 70: /* ConstExp: Exp  */
+#line 525 "syntax.y"
       {
     auto constExp = new ConstExp();
     constExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = constExp;
 }
-#line 1939 "syntax.tab.c"
+#line 2057 "syntax.tab.c"
     break;
 
-  case 63: /* Exp: AddExp  */
-#line 469 "syntax.y"
+  case 71: /* Exp: AddExp  */
+#line 532 "syntax.y"
          {
     auto exp = new Exp();
     exp->add_exp = shared_ptr<AddExp>((AddExp* )(yyvsp[0].tree));
     (yyval.tree) = exp;
 }
-#line 1949 "syntax.tab.c"
+#line 2067 "syntax.tab.c"
     break;
 
-  case 64: /* Cond: LOrExp  */
-#line 476 "syntax.y"
+  case 72: /* Cond: LOrExp  */
+#line 539 "syntax.y"
          {
     auto cond = new Cond();
     cond->lOrExp = shared_ptr<LOrExp>((LOrExp* )(yyvsp[0].tree));
     (yyval.tree) = cond;
 }
-#line 1959 "syntax.tab.c"
+#line 2077 "syntax.tab.c"
     break;
 
-  case 65: /* LVal: IDENT  */
-#line 483 "syntax.y"
+  case 73: /* LVal: IDENT  */
+#line 546 "syntax.y"
         {
     auto lVal = new LVal();
     lVal->varKind = VarKind::Var;
     lVal->ident = *((yyvsp[0].sval));
     (yyval.tree) = lVal;
 }
-#line 1970 "syntax.tab.c"
+#line 2088 "syntax.tab.c"
     break;
 
-  case 66: /* LVal: IDENT ArrayIndex  */
-#line 489 "syntax.y"
+  case 74: /* LVal: IDENT ArrayIndex  */
+#line 552 "syntax.y"
                    {
     auto lVal = new LVal();
     lVal->varKind = VarKind::Array;
@@ -1978,66 +2096,66 @@ yyreduce:
     lVal->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = lVal;
 }
-#line 1982 "syntax.tab.c"
+#line 2100 "syntax.tab.c"
     break;
 
-  case 67: /* PrimaryExp: LPAREN Exp RPAREN  */
-#line 498 "syntax.y"
+  case 75: /* PrimaryExp: LPAREN Exp RPAREN  */
+#line 561 "syntax.y"
                     {
     auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::Exp;
     primaryExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = primaryExp;
 }
-#line 1993 "syntax.tab.c"
+#line 2111 "syntax.tab.c"
     break;
 
-  case 68: /* PrimaryExp: LVal  */
-#line 504 "syntax.y"
+  case 76: /* PrimaryExp: LVal  */
+#line 567 "syntax.y"
        {
     auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::LVal;
     primaryExp->lVal = shared_ptr<LVal>((LVal* )(yyvsp[0].tree));
     (yyval.tree) = primaryExp;
 }
-#line 2004 "syntax.tab.c"
+#line 2122 "syntax.tab.c"
     break;
 
-  case 69: /* PrimaryExp: INTCONST  */
-#line 510 "syntax.y"
+  case 77: /* PrimaryExp: INTCONST  */
+#line 573 "syntax.y"
            {
     auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::Number;
     primaryExp->number = (yyvsp[0].ival);
     (yyval.tree) = primaryExp;
 }
-#line 2015 "syntax.tab.c"
+#line 2133 "syntax.tab.c"
     break;
 
-  case 70: /* UnaryExp: PrimaryExp  */
-#line 518 "syntax.y"
+  case 78: /* UnaryExp: PrimaryExp  */
+#line 581 "syntax.y"
              {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::PrimaryExp;
     unaryExp->primary_exp = shared_ptr<PrimaryExp>((PrimaryExp* )(yyvsp[0].tree));
     (yyval.tree) = unaryExp;
 }
-#line 2026 "syntax.tab.c"
+#line 2144 "syntax.tab.c"
     break;
 
-  case 71: /* UnaryExp: IDENT LPAREN RPAREN  */
-#line 524 "syntax.y"
+  case 79: /* UnaryExp: IDENT LPAREN RPAREN  */
+#line 587 "syntax.y"
                       {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::FuncCall;
     unaryExp->func_ident = *((yyvsp[-2].sval));
     (yyval.tree) = unaryExp;
 }
-#line 2037 "syntax.tab.c"
+#line 2155 "syntax.tab.c"
     break;
 
-  case 72: /* UnaryExp: IDENT LPAREN FuncRParamList RPAREN  */
-#line 530 "syntax.y"
+  case 80: /* UnaryExp: IDENT LPAREN FuncRParamList RPAREN  */
+#line 593 "syntax.y"
                                      {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::FuncCall;
@@ -2045,11 +2163,11 @@ yyreduce:
     unaryExp->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )(yyvsp[-1].tree));
     (yyval.tree) = unaryExp;
 }
-#line 2049 "syntax.tab.c"
+#line 2167 "syntax.tab.c"
     break;
 
-  case 73: /* UnaryExp: UnaryOp UnaryExp  */
-#line 537 "syntax.y"
+  case 81: /* UnaryExp: UnaryOp UnaryExp  */
+#line 600 "syntax.y"
                    {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::OP_Exp;
@@ -2057,67 +2175,67 @@ yyreduce:
     unaryExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = unaryExp;
 }
-#line 2061 "syntax.tab.c"
+#line 2179 "syntax.tab.c"
     break;
 
-  case 74: /* UnaryOp: '+'  */
-#line 546 "syntax.y"
+  case 82: /* UnaryOp: '+'  */
+#line 609 "syntax.y"
       {
     (yyval.chval) = '+';
 }
-#line 2069 "syntax.tab.c"
+#line 2187 "syntax.tab.c"
     break;
 
-  case 75: /* UnaryOp: '-'  */
-#line 549 "syntax.y"
+  case 83: /* UnaryOp: '-'  */
+#line 612 "syntax.y"
       {
     (yyval.chval) = '-';
 }
-#line 2077 "syntax.tab.c"
+#line 2195 "syntax.tab.c"
     break;
 
-  case 76: /* UnaryOp: '!'  */
-#line 552 "syntax.y"
+  case 84: /* UnaryOp: '!'  */
+#line 615 "syntax.y"
       {
     (yyval.chval) = '!';
 }
-#line 2085 "syntax.tab.c"
+#line 2203 "syntax.tab.c"
     break;
 
-  case 77: /* FuncRParamList: Exp  */
-#line 557 "syntax.y"
+  case 85: /* FuncRParamList: Exp  */
+#line 620 "syntax.y"
       {
     auto funcRParamList = new FuncRParamList();
     funcRParamList->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = funcRParamList;
 }
-#line 2095 "syntax.tab.c"
+#line 2213 "syntax.tab.c"
     break;
 
-  case 78: /* FuncRParamList: Exp ',' FuncRParamList  */
-#line 562 "syntax.y"
+  case 86: /* FuncRParamList: Exp ',' FuncRParamList  */
+#line 625 "syntax.y"
                          {
     auto funcRParamList = new FuncRParamList();
     funcRParamList->exp = shared_ptr<Exp>((Exp* )(yyvsp[-2].tree));
     funcRParamList->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )(yyvsp[0].tree));
     (yyval.tree) = funcRParamList;
 }
-#line 2106 "syntax.tab.c"
+#line 2224 "syntax.tab.c"
     break;
 
-  case 79: /* MulExp: UnaryExp  */
-#line 570 "syntax.y"
+  case 87: /* MulExp: UnaryExp  */
+#line 633 "syntax.y"
            {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::UnaryExp;
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2117 "syntax.tab.c"
+#line 2235 "syntax.tab.c"
     break;
 
-  case 80: /* MulExp: MulExp '*' UnaryExp  */
-#line 576 "syntax.y"
+  case 88: /* MulExp: MulExp '*' UnaryExp  */
+#line 639 "syntax.y"
                       {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
@@ -2126,11 +2244,11 @@ yyreduce:
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2130 "syntax.tab.c"
+#line 2248 "syntax.tab.c"
     break;
 
-  case 81: /* MulExp: MulExp '/' UnaryExp  */
-#line 584 "syntax.y"
+  case 89: /* MulExp: MulExp '/' UnaryExp  */
+#line 647 "syntax.y"
                       {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
@@ -2139,11 +2257,11 @@ yyreduce:
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2143 "syntax.tab.c"
+#line 2261 "syntax.tab.c"
     break;
 
-  case 82: /* MulExp: MulExp '%' UnaryExp  */
-#line 592 "syntax.y"
+  case 90: /* MulExp: MulExp '%' UnaryExp  */
+#line 655 "syntax.y"
                       {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
@@ -2152,22 +2270,22 @@ yyreduce:
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2156 "syntax.tab.c"
+#line 2274 "syntax.tab.c"
     break;
 
-  case 83: /* AddExp: MulExp  */
-#line 602 "syntax.y"
+  case 91: /* AddExp: MulExp  */
+#line 665 "syntax.y"
          {
     auto addExp = new AddExp();
     addExp->addExpType = AddExpType::MulExp;
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )(yyvsp[0].tree));
     (yyval.tree) = addExp;
 }
-#line 2167 "syntax.tab.c"
+#line 2285 "syntax.tab.c"
     break;
 
-  case 84: /* AddExp: AddExp '+' MulExp  */
-#line 608 "syntax.y"
+  case 92: /* AddExp: AddExp '+' MulExp  */
+#line 671 "syntax.y"
                     {
     auto addExp = new AddExp();
     addExp->addExpType = AddExpType::AddMulExp;
@@ -2176,11 +2294,11 @@ yyreduce:
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )(yyvsp[0].tree));
     (yyval.tree) = addExp;
 }
-#line 2180 "syntax.tab.c"
+#line 2298 "syntax.tab.c"
     break;
 
-  case 85: /* AddExp: AddExp '-' MulExp  */
-#line 616 "syntax.y"
+  case 93: /* AddExp: AddExp '-' MulExp  */
+#line 679 "syntax.y"
                     {
     auto addExp = new AddExp();
     addExp->addExpType = AddExpType::AddMulExp;
@@ -2189,22 +2307,22 @@ yyreduce:
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )(yyvsp[0].tree));
     (yyval.tree) = addExp;
 }
-#line 2193 "syntax.tab.c"
+#line 2311 "syntax.tab.c"
     break;
 
-  case 86: /* RelExp: AddExp  */
-#line 626 "syntax.y"
+  case 94: /* RelExp: AddExp  */
+#line 689 "syntax.y"
          {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::AddExp;
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2204 "syntax.tab.c"
+#line 2322 "syntax.tab.c"
     break;
 
-  case 87: /* RelExp: RelExp '<' AddExp  */
-#line 632 "syntax.y"
+  case 95: /* RelExp: RelExp '<' AddExp  */
+#line 695 "syntax.y"
                     {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
@@ -2213,11 +2331,28 @@ yyreduce:
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2217 "syntax.tab.c"
+#line 2335 "syntax.tab.c"
     break;
 
-  case 88: /* RelExp: RelExp '>' AddExp  */
-#line 640 "syntax.y"
+  case 96: /* RelExp: RelExp '<' error  */
+#line 703 "syntax.y"
+                   {
+    fprintf(stderr, "Error: Unknown operator\n");
+    auto relExp = new RelExp();
+    relExp->relExpType = RelExpType::RelAddExp;
+    relExp->relExp = shared_ptr<RelExp>((RelExp* )(yyvsp[-2].tree));
+    relExp->op = "\\<";
+    auto addExp = new AddExp();
+    addExp->err_empty = true;
+    relExp->add_exp = shared_ptr<AddExp>(addExp);
+    (yyval.tree) = relExp;
+
+}
+#line 2352 "syntax.tab.c"
+    break;
+
+  case 97: /* RelExp: RelExp '>' AddExp  */
+#line 715 "syntax.y"
                     {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
@@ -2226,11 +2361,11 @@ yyreduce:
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2230 "syntax.tab.c"
+#line 2365 "syntax.tab.c"
     break;
 
-  case 89: /* RelExp: RelExp LE AddExp  */
-#line 648 "syntax.y"
+  case 98: /* RelExp: RelExp LE AddExp  */
+#line 723 "syntax.y"
                    {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
@@ -2239,11 +2374,11 @@ yyreduce:
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2243 "syntax.tab.c"
+#line 2378 "syntax.tab.c"
     break;
 
-  case 90: /* RelExp: RelExp GE AddExp  */
-#line 656 "syntax.y"
+  case 99: /* RelExp: RelExp GE AddExp  */
+#line 731 "syntax.y"
                    {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelAddExp;
@@ -2252,22 +2387,22 @@ yyreduce:
     relExp->add_exp = shared_ptr<AddExp>((AddExp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2256 "syntax.tab.c"
+#line 2391 "syntax.tab.c"
     break;
 
-  case 91: /* EqExp: RelExp  */
-#line 666 "syntax.y"
+  case 100: /* EqExp: RelExp  */
+#line 741 "syntax.y"
          {
     auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::RelExp;
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )(yyvsp[0].tree));
     (yyval.tree) = eqExp;
 }
-#line 2267 "syntax.tab.c"
+#line 2402 "syntax.tab.c"
     break;
 
-  case 92: /* EqExp: EqExp EQ RelExp  */
-#line 672 "syntax.y"
+  case 101: /* EqExp: EqExp EQ RelExp  */
+#line 747 "syntax.y"
                   {
     auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::EqRelExp;
@@ -2276,11 +2411,11 @@ yyreduce:
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )(yyvsp[0].tree));
     (yyval.tree) = eqExp;
 }
-#line 2280 "syntax.tab.c"
+#line 2415 "syntax.tab.c"
     break;
 
-  case 93: /* EqExp: EqExp NE RelExp  */
-#line 680 "syntax.y"
+  case 102: /* EqExp: EqExp NE RelExp  */
+#line 755 "syntax.y"
                   {
     auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::EqRelExp;
@@ -2289,22 +2424,22 @@ yyreduce:
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )(yyvsp[0].tree));
     (yyval.tree) = eqExp;
 }
-#line 2293 "syntax.tab.c"
+#line 2428 "syntax.tab.c"
     break;
 
-  case 94: /* LAndExp: EqExp  */
-#line 690 "syntax.y"
+  case 103: /* LAndExp: EqExp  */
+#line 765 "syntax.y"
         {
     auto lAndExp = new LAndExp();
     lAndExp->lAndExpType = LAndExpType::EqExp;
     lAndExp->eqExp = shared_ptr<EqExp>((EqExp* )(yyvsp[0].tree));
     (yyval.tree) = lAndExp;
 }
-#line 2304 "syntax.tab.c"
+#line 2439 "syntax.tab.c"
     break;
 
-  case 95: /* LAndExp: LAndExp LAND EqExp  */
-#line 696 "syntax.y"
+  case 104: /* LAndExp: LAndExp LAND EqExp  */
+#line 771 "syntax.y"
                      {
     auto lAndExp = new LAndExp();
     lAndExp->lAndExpType = LAndExpType::LAndEqExp;
@@ -2312,22 +2447,22 @@ yyreduce:
     lAndExp->eqExp = shared_ptr<EqExp>((EqExp* )(yyvsp[0].tree));
     (yyval.tree) = lAndExp;
 }
-#line 2316 "syntax.tab.c"
+#line 2451 "syntax.tab.c"
     break;
 
-  case 96: /* LOrExp: LAndExp  */
-#line 705 "syntax.y"
+  case 105: /* LOrExp: LAndExp  */
+#line 780 "syntax.y"
           {
     auto lOrExp = new LOrExp();
     lOrExp->lOrExpType = LOrExpType::LAndExp;
     lOrExp->lAndExp = shared_ptr<LAndExp>((LAndExp* )(yyvsp[0].tree));
     (yyval.tree) = lOrExp;
 }
-#line 2327 "syntax.tab.c"
+#line 2462 "syntax.tab.c"
     break;
 
-  case 97: /* LOrExp: LOrExp LOR LAndExp  */
-#line 711 "syntax.y"
+  case 106: /* LOrExp: LOrExp LOR LAndExp  */
+#line 786 "syntax.y"
                      {
     auto lOrExp = new LOrExp();
     lOrExp->lOrExpType = LOrExpType::LOrLAndExp;
@@ -2335,11 +2470,11 @@ yyreduce:
     lOrExp->lAndExp = shared_ptr<LAndExp>((LAndExp* )(yyvsp[0].tree));
     (yyval.tree) = lOrExp;
 }
-#line 2339 "syntax.tab.c"
+#line 2474 "syntax.tab.c"
     break;
 
 
-#line 2343 "syntax.tab.c"
+#line 2478 "syntax.tab.c"
 
       default: break;
     }
@@ -2532,7 +2667,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 720 "syntax.y"
+#line 795 "syntax.y"
 
 
 void yyerror(const char *s) {
