@@ -11,9 +11,7 @@ using std::string;
 
 %}
 
-letter [a-zA-Z]
 
-digit [0-9]
 binary_digit [01]
 hex_digit [0-9a-fA-F]
 
@@ -22,7 +20,7 @@ binary_num (0[b]){binary_digit}+
 octal_num 0[0-7]*
 hex_num (0[xX]){hex_digit}+
 
-id (\_)*{letter}(\_)*({letter}|{digit})*
+id [a-zA-Z_][a-zA-Z_0-9]*
 
 blank [ \t]
 line_break [\n]+
@@ -32,13 +30,18 @@ comment_block \/\*([^*]|\*[^/])*\*\/
 
 STRING_LITERAL \"([^\\"]|\\.)*\"
 
-FILE_NAME [a-zA-Z_\-\.]+
+FILE_NAME <[a-zA-Z_\-\.]+>
 
 %%
 
 "#include" {
     yylval.sval = new string(yytext);
     return INCLUDE;
+}
+
+{FILE_NAME} {
+    yylval.sval = new string(yytext);
+    return FILE_NAME;
 }
 
 "int" {
@@ -158,11 +161,6 @@ FILE_NAME [a-zA-Z_\-\.]+
 {hex_num} {
     yylval.ival = strtol(yytext, nullptr, 16);
     return INTCONST;
-}
-
-{FILE_NAME} {
-    yylval.sval = new string(yytext);
-    return FILE_NAME;
 }
 
 {blank} {}
