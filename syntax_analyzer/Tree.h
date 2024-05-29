@@ -433,6 +433,9 @@ class UnaryExp : public Tree {
 
         string ident;
 
+        bool ptr_to_array = false;
+        shared_ptr<ArrayIndex> arrayIndex;
+
         shared_ptr<FuncRParamList> funcRParamList;
         string op;
         shared_ptr<UnaryExp> unary_exp;

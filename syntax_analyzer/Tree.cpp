@@ -380,11 +380,23 @@ void UnaryExp::print(int parent, string part) {
         }
     }
     else {
-        cout << "node" << node_id << "[label = \"<f0> UnaryExp|<f1> " << op << "|<f2> UnaryExp\"];" << endl;
-        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-        int parent_id = node_id++;
-        this->unary_exp->print(parent_id, "f0");
-        this->unary_exp->print(parent_id, "f2");
+        if (this->unary_exp) {
+            cout << "node" << node_id << "[label = \"<f0> UnaryExp|<f1> " << op << "|<f2> UnaryExp\"];" << endl;
+            cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+            int parent_id = node_id++;
+            this->unary_exp->print(parent_id, "f0");
+            this->unary_exp->print(parent_id, "f2"); 
+        }
+        else if (this->ptr_to_array) {
+            cout << "node" << node_id << "[label = \"<f0> &|<f1> " << ident << "|<f2> ArrayIndex\"];" << endl;
+            cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+            this->arrayIndex->print(node_id++, "f2");
+        }
+        else {
+            cout << "node" << node_id << "[label = \"<f0> &|<f1> " << ident << "\"];" << endl;
+            cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+            node_id++;
+        }
     }
 }
 
