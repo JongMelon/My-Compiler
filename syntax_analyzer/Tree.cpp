@@ -3,7 +3,11 @@
 using std::cout;
 using std::endl;
 
-int node_id = 0;
+static int node_id = 0;
+
+int Tree::newLabel() {
+    return label++;
+}
 
 void CompUnit::print(int parent, string part) {
     cout << "node" << node_id << "[label = \"<f0> CompUnit\"];" << endl;
@@ -126,7 +130,7 @@ void ConstDef::print(int parent, string part) {
         int parent_id = node_id;
         node_id++;
         this->constArrayIndex->print(parent_id, "f1");
-        this->constInitVal->print(parent_id, "f3");
+        this->array_initval->print(parent_id, "f3");
     }
 }
 
@@ -242,18 +246,18 @@ void ConstInitValList::print(int parent, string part) {
 
 void LVal::print(int parent, string part) {
     if (varKind == VarKind::Var) {
-        cout << "node" << node_id << "[label = \"<f0> LVal\"];" << endl;
-        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-        cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "\"];" << endl;
-        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
-        node_id += 2;
+        //cout << "node" << node_id << "[label = \"<f0> LVal\"];" << endl;
+        //cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        cout << "node" << node_id << "[label = \"<f0> " << ident << "\"];" << endl;
+        cout << "\"node" << parent << "\":" << "f0" << "->\"node" << node_id++ << "\";" << endl;
+        //node_id += 2;
     }
     else {
-        cout << "node" << node_id << "[label = \"<f0> LVal\"];" << endl;
-        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-        cout << "node" << node_id + 1 << "[label = \"<f0> " << ident << "|<f1> ArrayIndex\"];" << endl;
-        cout << "\"node" << node_id << "\":" << "f0" << "->\"node" << node_id + 1 << "\";" << endl;
-        node_id++;
+        //cout << "node" << node_id << "[label = \"<f0> LVal\"];" << endl;
+        //cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        cout << "node" << node_id << "[label = \"<f0> " << ident << "|<f1> ArrayIndex\"];" << endl;
+        cout << "\"node" << parent << "\":" << "f0" << "->\"node" << node_id << "\";" << endl;
+        //node_id++;
         this->arrayIndex->print(node_id++, "f1");
     }
 }
@@ -395,10 +399,15 @@ void PrimaryExp::print(int parent, string part) {
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
         node_id++;
     }
-    else {
+    else if (primaryExpType == PrimaryExpType::Exp) {
         cout << "node" << node_id << "[label = \"<f0> (|<f1> Exp|<f2> )\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
         this->exp->print(node_id++, "f1");
+    }
+    else if (primaryExpType == PrimaryExpType::String) {
+        cout << "node" << node_id << "[label = \"<f0> " << str << "\"];" << endl;
+        cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
+        node_id++;
     }
 }
 
@@ -471,17 +480,17 @@ void EqExp::print(int parent, string part) {
 }
 
 void RelExp::print(int parent, string part) {
-    if (relExpType == RelExpType::RelAddExp) {
-        cout << "node" << node_id << "[label = \"<f0> RelExp|<f1> " << op << "|<f2> AddExp\"];" << endl;
+    if (relExpType == RelExpType::RelExp) {
+        cout << "node" << node_id << "[label = \"<f0> RelExp|<f1> " << op << "|<f2> Exp\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
         int parent_id = node_id++;
         this->relExp->print(parent_id, "f0");
-        this->add_exp->print(parent_id, "f2");
+        this->exp->print(parent_id, "f2");
     }
     else {
         cout << "node" << node_id << "[label = \"<f0> AddExp\"];" << endl;
         cout << "\"node" << parent << "\":" << part << "->\"node" << node_id << "\";" << endl;
-        this->add_exp->print(node_id++, "f0");
+        this->exp->print(node_id++, "f0");
     }
 }
 

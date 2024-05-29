@@ -49,7 +49,8 @@ enum class UnaryExpType {
 enum class PrimaryExpType {
     Exp,
     LVal,
-    Number
+    Number,
+    String
 };
 
 enum class AddExpType {
@@ -78,8 +79,8 @@ enum class EqExpType {
 };
 
 enum class RelExpType {
-    AddExp,
-    RelAddExp
+    Exp,
+    RelExp
 };
 
 class Tree;
@@ -133,11 +134,21 @@ class EqExp;
 class LAndExp;
 class LOrExp;
 
+static int label = 1;
+
 class Tree {
     public:
-        ~Tree() = default;
+        virtual ~Tree() = default;
         virtual void print(int parent, string part) = 0;
+
+        int newLabel();
+
         bool err_empty = false;
+
+        vector<int> next_list;
+        vector<int> true_list;
+        vector<int> false_list;
+        int quad = 0;
 };
 
 class CompUnit : public Tree {
@@ -151,6 +162,9 @@ class CompList : public Tree {
         bool if_more_CompList = false;
         shared_ptr<CompList> compList;
         shared_ptr<DeclOrDef> declOrDef;
+
+        vector<shared_ptr<DeclOrDef>> declOrDefs;
+
         void print(int parent, string part);
 };
 
@@ -175,6 +189,7 @@ class VarDecl : public Tree {
         bool unknownType = false;
         DecType decType = DecType::VarDecl;
         shared_ptr<VarDefList> varDefList;
+        vector<shared_ptr<VarDef>> vardefs;
         shared_ptr<VarType> varType;
         void print(int parent, string part) override;
 };
@@ -183,6 +198,7 @@ class VarDefList : public Tree {
     public:
         shared_ptr<VarDef> varDef;
         shared_ptr<VarDefList> varDefList;
+        vector<shared_ptr<VarDef>> vardefs;
         void print(int parent, string part);
 };
 
@@ -198,6 +214,9 @@ class ConstDefList : public Tree {
     public:
         shared_ptr<ConstDef> constDef;
         shared_ptr<ConstDefList> constDefList;
+
+        vector<shared_ptr<ConstDef>> constdefs;
+
         void print(int parent, string part);
 };
 
@@ -207,6 +226,7 @@ class ConstDef : public Tree {
         VarKind varKind;
         shared_ptr<ConstInitVal> constInitVal;
         shared_ptr<ConstArrayIndex> constArrayIndex;
+        shared_ptr<InitVal> array_initval;
         void print(int parent, string part);
 };
 
@@ -231,6 +251,9 @@ class InitValList : public Tree {
     public:
         shared_ptr<InitVal> initVal;
         shared_ptr<InitValList> initValList;
+
+        vector<shared_ptr<InitVal>> initVals;
+
         void print(int parent, string part);
 };
 
@@ -261,6 +284,7 @@ class ArrayIndex : public Tree {
     public:
         shared_ptr<ArrayIndex> arrayIndex;
         shared_ptr<Exp> exp;
+        vector<shared_ptr<Exp>> exps;
         void print(int parent, string part);
 };
 
@@ -268,6 +292,7 @@ class ConstArrayIndex : public Tree {
     public:
         shared_ptr<ConstArrayIndex> constArrayIndex;
         shared_ptr<ConstExp> const_exp;
+        vector<shared_ptr<ConstExp>> const_exps;
         void print(int parent, string part);
 };
 
@@ -288,6 +313,9 @@ class BlockItemList : public Tree {
     public:
         shared_ptr<BlockItem> blockItem;
         shared_ptr<BlockItemList> blockItemList;
+
+        vector<shared_ptr<BlockItem>> blockItems;
+
         void print(int parent, string part);
 };
 
@@ -337,6 +365,9 @@ class FuncFParamList : public Tree {
     public:
         shared_ptr<FuncFParam> funcFParam;
         shared_ptr<FuncFParamList> funcFParamList;
+
+        vector<shared_ptr<FuncFParam>> funcFParams;
+
         void print(int parent, string part);
 };
 
@@ -352,13 +383,31 @@ class FuncFParam : public Tree {
 class Exp : public Tree {
     public:
         bool is_in_array = false;
+        bool is_str = false;
+        bool is_const = false;
+        int const_var = 0;
+        string var_ident;
+        string bin_op;
+        string unary_op;
+    
+        string func_ident;
+        shared_ptr<FuncRParamList> funcRParamList;
+
+        string array_ident;
+        shared_ptr<ArrayIndex> arrayIndex;
+
+        shared_ptr<Exp> exp1;
+        shared_ptr<Exp> exp2;
+
         shared_ptr<AddExp> add_exp;
+        string str;
         void print(int parent, string part);
 };
 
 class AddExp : public Tree {
     public:
         AddExpType addExpType;
+        bool is_const = false;
         shared_ptr<MulExp> mul_exp;
         shared_ptr<AddExp> add_exp;
         string op;
@@ -368,6 +417,7 @@ class AddExp : public Tree {
 class MulExp : public Tree {
     public:
         MulExpType mulExpType;
+        bool is_const = false;
         shared_ptr<UnaryExp> unary_exp;
         shared_ptr<MulExp> mul_exp;
         string op;
@@ -378,7 +428,11 @@ class UnaryExp : public Tree {
     public:
         UnaryExpType unaryExpType;
         shared_ptr<PrimaryExp> primary_exp;
+        bool is_const = false;
         string func_ident;
+
+        string ident;
+
         shared_ptr<FuncRParamList> funcRParamList;
         string op;
         shared_ptr<UnaryExp> unary_exp;
@@ -389,8 +443,10 @@ class PrimaryExp : public Tree {
     public:
         PrimaryExpType primaryExpType;
         shared_ptr<Exp> exp;
+        bool is_const = false;
         shared_ptr<LVal> lVal;
         int number;
+        string str;
         void print(int parent, string part);
 };
 
@@ -398,12 +454,17 @@ class FuncRParamList : public Tree {
     public:
         shared_ptr<Exp> exp;
         shared_ptr<FuncRParamList> funcRParamList;
+        vector<shared_ptr<Exp>> exps;
         void print(int parent, string part);
 };
 
 class Cond : public Tree {
     public:
         shared_ptr<LOrExp> lOrExp;
+
+        int true_list = 0;
+        int false_list = 0;
+
         void print(int parent, string part);
 };
 
@@ -428,6 +489,9 @@ class EqExp : public Tree {
         EqExpType eqExpType;
         shared_ptr<RelExp> relExp;
         shared_ptr<EqExp> eqExp;
+
+        bool is_rel_exp = false;
+
         string op;
         void print(int parent, string part);
 };
@@ -435,8 +499,12 @@ class EqExp : public Tree {
 class RelExp : public Tree {
     public:
         RelExpType relExpType;
-        shared_ptr<AddExp> add_exp;
+        shared_ptr<Exp> exp;
         shared_ptr<RelExp> relExp;
+
+        bool is_exp = false;
+        bool err_empty = false;
+
         string op;
         void print(int parent, string part);
 };
