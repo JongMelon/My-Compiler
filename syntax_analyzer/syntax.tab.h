@@ -47,7 +47,7 @@ extern int yydebug;
 /* "%code requires" blocks.  */
 #line 1 "syntax.y"
 
-    #include "Tree.h"
+    #include "Trans.h"
 
 #line 53 "syntax.tab.h"
 
@@ -70,19 +70,23 @@ extern int yydebug;
     RETURN = 265,                  /* RETURN  */
     IDENT = 266,                   /* IDENT  */
     VOID = 267,                    /* VOID  */
-    INTCONST = 268,                /* INTCONST  */
-    LEFTSQB = 269,                 /* LEFTSQB  */
-    RIGHTSQB = 270,                /* RIGHTSQB  */
-    LPAREN = 271,                  /* LPAREN  */
-    RPAREN = 272,                  /* RPAREN  */
-    LEFTBRACE = 273,               /* LEFTBRACE  */
-    RIGHTBRACE = 274,              /* RIGHTBRACE  */
-    LE = 275,                      /* LE  */
-    GE = 276,                      /* GE  */
-    EQ = 277,                      /* EQ  */
-    NE = 278,                      /* NE  */
-    LOR = 279,                     /* LOR  */
-    LAND = 280                     /* LAND  */
+    STRING = 268,                  /* STRING  */
+    INCLUDE = 269,                 /* INCLUDE  */
+    FILE_NAME = 270,               /* FILE_NAME  */
+    INTCONST = 271,                /* INTCONST  */
+    LEFTSQB = 272,                 /* LEFTSQB  */
+    RIGHTSQB = 273,                /* RIGHTSQB  */
+    LPAREN = 274,                  /* LPAREN  */
+    RPAREN = 275,                  /* RPAREN  */
+    LEFTBRACE = 276,               /* LEFTBRACE  */
+    RIGHTBRACE = 277,              /* RIGHTBRACE  */
+    MINUS = 278,                   /* MINUS  */
+    LE = 279,                      /* LE  */
+    GE = 280,                      /* GE  */
+    EQ = 281,                      /* EQ  */
+    NE = 282,                      /* NE  */
+    LOR = 283,                     /* LOR  */
+    LAND = 284                     /* LAND  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -91,14 +95,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 17 "syntax.y"
+#line 19 "syntax.y"
 
     int ival;
     char chval;
     std::string* sval;
     Tree* tree;
 
-#line 102 "syntax.tab.h"
+#line 106 "syntax.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -1,16 +1,18 @@
 %code requires {
-    #include "Tree.h"
+    #include "Trans.h"
 }
-
 
 %{
 
 #include <stdio.h>
 #include <string>
-#include "Tree.h"
+//#include "Tree.h"
+#include "Trans.h"
 
 int yylex(void);
 void yyerror(const char *s);
+
+string file_name = "assembly1.s";
 
 %}
 
@@ -23,10 +25,11 @@ void yyerror(const char *s);
 
 %start CompUnit
 
-%token <sval>CONST INT IF ELSE WHILE BREAK CONTINUE RETURN IDENT VOID
+%token <sval>CONST INT IF ELSE WHILE BREAK CONTINUE RETURN IDENT VOID STRING INCLUDE FILE_NAME
 %token <ival>INTCONST
 %token <chval>LEFTSQB RIGHTSQB LPAREN RPAREN LEFTBRACE RIGHTBRACE
-%token <chval>'+' '-' '*' '/' '%' '<' '>' '!' ',' ';' '='
+%token <chval>'+' '*' '/' '%' '<' '>' '!' ',' ';' '='
+%token <chval>MINUS
 %token <sval>LE GE EQ NE LOR LAND
 
 %type <tree> CompUnit
@@ -37,33 +40,39 @@ void yyerror(const char *s);
 
 %type <tree>CompList DecOrDef VarType
 
+%type <sval>INCLUDE_STMT
+
 %type <chval>UnaryOp
 
 %left LOR
 %left LAND
 %left EQ NE
 %left '<' '>' LE GE
-%left '+' '-'
+%left '+' MINUS
 %left '*' '/' '%'
 %right '!'
 
 %%
 
 CompUnit
-: CompList {
+: INCLUDE_STMT CompList {
     auto compUnit = new CompUnit();
-    compUnit->compList = shared_ptr<CompList>((CompList* )$1);
+    compUnit->compList = shared_ptr<CompList>((CompList* )$2);
     $$ = compUnit;
     std::cout << "digraph \" \"{" << std::endl;
     std::cout << "node [shape = record,height=.1]" << std::endl;
     compUnit->print(0, "");
     std::cout << "}" << std::endl;
+
+    auto Code_Generator = new CodeGenerator();
+    Code_Generator->dump(shared_ptr<CompUnit>(compUnit), file_name);
 }
 
 CompList
 : DecOrDef {
     auto compList = new CompList();
     compList->declOrDef = shared_ptr<DeclOrDef>((DeclOrDef* )$1);
+    compList->declOrDefs.push_back(compList->declOrDef);
     $$ = compList;
 }
 | CompList DecOrDef {
@@ -71,6 +80,10 @@ CompList
     compList->if_more_CompList = true;
     compList->compList = shared_ptr<CompList>((CompList* )$1);
     compList->declOrDef = shared_ptr<DeclOrDef>((DeclOrDef* )$2);
+
+    compList->declOrDefs = compList->compList->declOrDefs;
+    compList->declOrDefs.push_back(compList->declOrDef);
+
     $$ = compList;
 }
 
@@ -119,12 +132,17 @@ ConstDefList
 : ConstDef {
     auto constDefList = new ConstDefList();
     constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )$1);
+    constDefList->constdefs.push_back(constDefList->constDef);
     $$ = constDefList;
 }
-| ConstDef ',' ConstDefList {
+| ConstDefList ',' ConstDef {
     auto constDefList = new ConstDefList();
-    constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )$1);
-    constDefList->constDefList = shared_ptr<ConstDefList>((ConstDefList* )$3);
+    constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )$3);
+    constDefList->constDefList = shared_ptr<ConstDefList>((ConstDefList* )$1);
+
+    constDefList->constdefs = constDefList->constDefList->constdefs;
+    constDefList->constdefs.push_back(constDefList->constDef);
+
     $$ = constDefList;
 }
 
@@ -136,14 +154,22 @@ ConstDef
     constDef->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )$3);
     $$ = constDef;
 }
-| IDENT ConstArrayIndex '=' ConstInitVal {
+| IDENT ConstArrayIndex '=' InitVal {
+    auto constDef = new ConstDef();
+    constDef->varKind = VarKind::Array;
+    constDef->ident = *($1);
+    constDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$2);
+    constDef->array_initval = shared_ptr<InitVal>((InitVal* )$4);
+    $$ = constDef;
+}
+/*| IDENT ConstArrayIndex '=' ConstInitVal {
     auto constDef = new ConstDef();
     constDef->varKind = VarKind::Array;
     constDef->ident = *($1);
     constDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$2);
     constDef->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )$4);
     $$ = constDef;
-}
+}*/
 
 ConstInitVal
 : ConstExp {
@@ -180,6 +206,7 @@ VarDecl
 : FuncType VarDefList ';' {
     auto varDecl = new VarDecl();
     varDecl->varDefList = shared_ptr<VarDefList>((VarDefList* )$2);
+    varDecl->vardefs = varDecl->varDefList->vardefs;
     $$ = varDecl;
 }
 | error VarDefList ';' {
@@ -194,12 +221,16 @@ VarDefList
 : VarDef {
     auto varDefList = new VarDefList();
     varDefList->varDef = shared_ptr<VarDef>((VarDef* )$1);
+    varDefList->vardefs.push_back(varDefList->varDef);
     $$ = varDefList;
 }
-| VarDef ',' VarDefList {
+| VarDefList ',' VarDef {
     auto varDefList = new VarDefList();
-    varDefList->varDef = shared_ptr<VarDef>((VarDef* )$1);
-    varDefList->varDefList = shared_ptr<VarDefList>((VarDefList* )$3);
+    varDefList->varDef = shared_ptr<VarDef>((VarDef* )$3);
+    varDefList->varDefList = shared_ptr<VarDefList>((VarDefList* )$1);
+
+    varDefList->vardefs = varDefList->varDefList->vardefs;
+    varDefList->vardefs.push_back(varDefList->varDef);
     $$ = varDefList;
 }
 
@@ -269,12 +300,15 @@ ConstArrayIndex
 : LEFTSQB ConstExp RIGHTSQB {
     auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->const_exp = shared_ptr<ConstExp>((ConstExp* )$2);
+    constArrayIndex->const_exps.push_back(constArrayIndex->const_exp);
     $$ = constArrayIndex;
 }
 | ConstArrayIndex LEFTSQB ConstExp RIGHTSQB {
     auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )$1);
     constArrayIndex->const_exp = shared_ptr<ConstExp>((ConstExp* )$3);
+    constArrayIndex->const_exps = constArrayIndex->constArrayIndex->const_exps;
+    constArrayIndex->const_exps.push_back(constArrayIndex->const_exp);
     $$ = constArrayIndex;
 }
 
@@ -301,12 +335,19 @@ InitValList
 : InitVal {
     auto initValList = new InitValList();
     initValList->initVal = shared_ptr<InitVal>((InitVal* )$1);
+
+    initValList->initVals.push_back(initValList->initVal);
+
     $$ = initValList;
 }
-| InitVal ',' InitValList {
+| InitValList ',' InitVal {
     auto initValList = new InitValList();
-    initValList->initVal = shared_ptr<InitVal>((InitVal* )$1);
-    initValList->initValList = shared_ptr<InitValList>((InitValList* )$3);
+    initValList->initVal = shared_ptr<InitVal>((InitVal* )$3);
+    initValList->initValList = shared_ptr<InitValList>((InitValList* )$1);
+
+    initValList->initVals = initValList->initValList->initVals;
+    initValList->initVals.push_back(initValList->initVal);
+
     $$ = initValList;
 }
 
@@ -359,12 +400,19 @@ FuncFParamList
 : FuncFParam {
     auto funcFParamList = new FuncFParamList();
     funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )$1);
+
+    funcFParamList->funcFParams.push_back(funcFParamList->funcFParam);
+
     $$ = funcFParamList;
 }
-| FuncFParam ',' FuncFParamList {
+| FuncFParamList ',' FuncFParam {
     auto funcFParamList = new FuncFParamList();
-    funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )$1);
-    funcFParamList->funcFParamList = shared_ptr<FuncFParamList>((FuncFParamList* )$3);
+    funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )$3);
+    funcFParamList->funcFParamList = shared_ptr<FuncFParamList>((FuncFParamList* )$1);
+
+    funcFParamList->funcFParams = funcFParamList->funcFParamList->funcFParams;
+    funcFParamList->funcFParams.push_back(funcFParamList->funcFParam);
+
     $$ = funcFParamList;
 }
 
@@ -405,12 +453,15 @@ ArrayIndex
 : LEFTSQB Exp RIGHTSQB {
     auto arrayIndex = new ArrayIndex();
     arrayIndex->exp = shared_ptr<Exp>((Exp* )$2);
+    arrayIndex->exps.push_back(arrayIndex->exp);
     $$ = arrayIndex;
 }
 | ArrayIndex LEFTSQB Exp RIGHTSQB {
     auto arrayIndex = new ArrayIndex();
     arrayIndex->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$1);
     arrayIndex->exp = shared_ptr<Exp>((Exp* )$3);
+    arrayIndex->exps = arrayIndex->arrayIndex->exps;
+    arrayIndex->exps.push_back(arrayIndex->exp);
     $$ = arrayIndex;
 }
 
@@ -429,12 +480,19 @@ BlockItemList
 : BlockItem {
     auto blockItemList = new BlockItemList();
     blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )$1);
+
+    blockItemList->blockItems.push_back(blockItemList->blockItem);
+
     $$ = blockItemList;
 }
-| BlockItem BlockItemList {
+| BlockItemList BlockItem {
     auto blockItemList = new BlockItemList();
-    blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )$1);
-    blockItemList->blockItemList = shared_ptr<BlockItemList>((BlockItemList* )$2);
+    blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )$2);
+    blockItemList->blockItemList = shared_ptr<BlockItemList>((BlockItemList* )$1);
+
+    blockItemList->blockItems = blockItemList->blockItemList->blockItems;
+    blockItemList->blockItems.push_back(blockItemList->blockItem);
+
     $$ = blockItemList;
 }
 
@@ -532,8 +590,101 @@ Exp
 : AddExp {
     auto exp = new Exp();
     exp->add_exp = shared_ptr<AddExp>((AddExp* )$1);
+    exp->is_const = exp->add_exp->is_const;
     $$ = exp;
 }
+/*INTCONST {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::CONST_VAR;
+    exp->const_var = $1;
+    $$ = exp;
+}
+| IDENT {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::VAR;
+    exp->var_ident = *($1);
+    $$ = exp;
+}
+| Exp '+' Exp {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::BIN;
+    exp->bin_op = "+";
+    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
+    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
+    $$ = exp;
+}
+| Exp '-' Exp {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::BIN;
+    exp->bin_op = "-";
+    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
+    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
+    $$ = exp;
+}
+| Exp '*' Exp {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::BIN;
+    exp->bin_op = "*";
+    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
+    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
+    $$ = exp;
+}
+| Exp '/' Exp {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::BIN;
+    exp->bin_op = "/";
+    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
+    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
+    $$ = exp;
+}
+| Exp '%' Exp {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::BIN;
+    exp->bin_op = "%";
+    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
+    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
+    $$ = exp;
+}
+| '-' Exp {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::UNARY;
+    exp->unary_op = "-";
+    exp->exp1 = shared_ptr<Exp>((Exp* )$2);
+    $$ = exp;
+}
+| '&' IDENT {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::UNARY;
+    exp->var_ident = *($2);
+    $$ = exp;
+}
+| IDENT LPAREN RPAREN {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::FUNC_CALL;
+    exp->func_ident = *($1);
+    $$ = exp;
+}
+| IDENT LPAREN FuncRParamList RPAREN {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::FUNC_CALL;
+    exp->func_ident = *($1);
+    exp->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )$3);
+    $$ = exp;
+} // function call
+| IDENT ArrayIndex {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::ARRAY;
+    exp->array_ident = *($1);
+    exp->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$2);
+    $$ = exp;
+}
+| STRING {
+    auto exp = new Exp();
+    exp->expType = Exp::ExpType::STR;
+    exp->is_str = true;
+    exp->str = *($1);
+    $$ = exp;
+}*/
 
 Cond
 : LOrExp {
@@ -576,6 +727,12 @@ PrimaryExp
     primaryExp->number = $1;
     $$ = primaryExp;
 }
+| STRING {
+    auto primaryExp = new PrimaryExp();
+    primaryExp->primaryExpType = PrimaryExpType::String;
+    primaryExp->str = *($1);
+    $$ = primaryExp;
+}
 
 UnaryExp
 : PrimaryExp {
@@ -604,12 +761,19 @@ UnaryExp
     unaryExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )$2);
     $$ = unaryExp;
 }
+| '&' IDENT {
+    auto unaryExp = new UnaryExp();
+    unaryExp->unaryExpType = UnaryExpType::OP_Exp;
+    unaryExp->op = "&";
+    unaryExp->ident = *($2);
+    $$ = unaryExp;
+}
 
 UnaryOp
 : '+' {
     $$ = '+';
 }
-| '-' {
+| MINUS {
     $$ = '-';
 }
 | '!' {
@@ -620,12 +784,15 @@ FuncRParamList
 : Exp {
     auto funcRParamList = new FuncRParamList();
     funcRParamList->exp = shared_ptr<Exp>((Exp* )$1);
+    funcRParamList->exps.push_back(funcRParamList->exp);
     $$ = funcRParamList;
 }
-| Exp ',' FuncRParamList {
+| FuncRParamList ',' Exp {
     auto funcRParamList = new FuncRParamList();
-    funcRParamList->exp = shared_ptr<Exp>((Exp* )$1);
-    funcRParamList->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )$3);
+    funcRParamList->exp = shared_ptr<Exp>((Exp* )$3);
+    funcRParamList->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )$1);
+    funcRParamList->exps = funcRParamList->funcRParamList->exps;
+    funcRParamList->exps.push_back(funcRParamList->exp);
     $$ = funcRParamList;
 }
 
@@ -676,7 +843,7 @@ AddExp
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )$3);
     $$ = addExp;
 }
-| AddExp '-' MulExp {
+| AddExp MINUS MulExp {
     auto addExp = new AddExp();
     addExp->addExpType = AddExpType::AddMulExp;
     addExp->add_exp = shared_ptr<AddExp>((AddExp* )$1);
@@ -686,54 +853,55 @@ AddExp
 }
 
 RelExp
-: AddExp {
+: Exp {
     auto relExp = new RelExp();
-    relExp->relExpType = RelExpType::AddExp;
-    relExp->add_exp = shared_ptr<AddExp>((AddExp* )$1);
+    relExp->relExpType = RelExpType::Exp;
+    relExp->exp = shared_ptr<Exp>((Exp* )$1);
+
+    relExp->is_exp = true;
+
     $$ = relExp;
 }
-| RelExp '<' AddExp {
+| RelExp '<' Exp {
     auto relExp = new RelExp();
-    relExp->relExpType = RelExpType::RelAddExp;
+    relExp->relExpType = RelExpType::RelExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
     relExp->op = "\\<";
-    relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
+    relExp->exp = shared_ptr<Exp>((Exp* )$3);
     $$ = relExp;
 }
 | RelExp '<' error {
     fprintf(stderr, "Error: Unknown operator\n");
     auto relExp = new RelExp();
-    relExp->relExpType = RelExpType::RelAddExp;
+    relExp->relExpType = RelExpType::RelExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
     relExp->op = "\\<";
-    auto addExp = new AddExp();
-    addExp->err_empty = true;
-    relExp->add_exp = shared_ptr<AddExp>(addExp);
+    relExp->err_empty = true;
     $$ = relExp;
 
 }
-| RelExp '>' AddExp {
+| RelExp '>' Exp {
     auto relExp = new RelExp();
-    relExp->relExpType = RelExpType::RelAddExp;
+    relExp->relExpType = RelExpType::RelExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
     relExp->op = "\\>";
-    relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
+    relExp->exp = shared_ptr<Exp>((Exp* )$3);
     $$ = relExp;
 }
-| RelExp LE AddExp {
+| RelExp LE Exp {
     auto relExp = new RelExp();
-    relExp->relExpType = RelExpType::RelAddExp;
+    relExp->relExpType = RelExpType::RelExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
     relExp->op = "\\<=";
-    relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
+    relExp->exp = shared_ptr<Exp>((Exp* )$3);
     $$ = relExp;
 }
-| RelExp GE AddExp {
+| RelExp GE Exp {
     auto relExp = new RelExp();
-    relExp->relExpType = RelExpType::RelAddExp;
+    relExp->relExpType = RelExpType::RelExp;
     relExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
     relExp->op = "\\>=";
-    relExp->add_exp = shared_ptr<AddExp>((AddExp* )$3);
+    relExp->exp = shared_ptr<Exp>((Exp* )$3);
     $$ = relExp;
 }
 
@@ -742,6 +910,9 @@ EqExp
     auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::RelExp;
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )$1);
+
+    eqExp->is_rel_exp = eqExp->relExp->is_exp;
+
     $$ = eqExp;
 }
 | EqExp EQ RelExp {
@@ -750,6 +921,9 @@ EqExp
     eqExp->eqExp = shared_ptr<EqExp>((EqExp* )$1);
     eqExp->op = "==";
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )$3);
+
+    eqExp->is_rel_exp = eqExp->relExp->is_exp;
+
     $$ = eqExp;
 }
 | EqExp NE RelExp {
@@ -757,6 +931,9 @@ EqExp
     eqExp->eqExpType = EqExpType::EqRelExp;
     eqExp->eqExp = shared_ptr<EqExp>((EqExp* )$1);
     eqExp->op = "!=";
+
+    eqExp->is_rel_exp = eqExp->relExp->is_exp;
+
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )$3);
     $$ = eqExp;
 }
@@ -791,6 +968,10 @@ LOrExp
     $$ = lOrExp;
 }
 
+INCLUDE_STMT
+: INCLUDE '<' FILE_NAME '>' {
+    //fprintf(stderr, "Error: Include statement is not supported\n");
+}
 
 %%
 
@@ -800,7 +981,7 @@ void yyerror(const char *s) {
 
 int main()
 {
-    freopen("input.sy", "r", stdin);
+    freopen("input.c", "r", stdin);
     freopen("output.dot", "w", stdout);
     yyparse();
     fclose(stdin);
