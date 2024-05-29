@@ -593,98 +593,6 @@ Exp
     exp->is_const = exp->add_exp->is_const;
     $$ = exp;
 }
-/*INTCONST {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::CONST_VAR;
-    exp->const_var = $1;
-    $$ = exp;
-}
-| IDENT {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::VAR;
-    exp->var_ident = *($1);
-    $$ = exp;
-}
-| Exp '+' Exp {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::BIN;
-    exp->bin_op = "+";
-    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
-    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
-    $$ = exp;
-}
-| Exp '-' Exp {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::BIN;
-    exp->bin_op = "-";
-    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
-    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
-    $$ = exp;
-}
-| Exp '*' Exp {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::BIN;
-    exp->bin_op = "*";
-    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
-    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
-    $$ = exp;
-}
-| Exp '/' Exp {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::BIN;
-    exp->bin_op = "/";
-    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
-    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
-    $$ = exp;
-}
-| Exp '%' Exp {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::BIN;
-    exp->bin_op = "%";
-    exp->exp1 = shared_ptr<Exp>((Exp* )$1);
-    exp->exp2 = shared_ptr<Exp>((Exp* )$3);
-    $$ = exp;
-}
-| '-' Exp {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::UNARY;
-    exp->unary_op = "-";
-    exp->exp1 = shared_ptr<Exp>((Exp* )$2);
-    $$ = exp;
-}
-| '&' IDENT {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::UNARY;
-    exp->var_ident = *($2);
-    $$ = exp;
-}
-| IDENT LPAREN RPAREN {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::FUNC_CALL;
-    exp->func_ident = *($1);
-    $$ = exp;
-}
-| IDENT LPAREN FuncRParamList RPAREN {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::FUNC_CALL;
-    exp->func_ident = *($1);
-    exp->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )$3);
-    $$ = exp;
-} // function call
-| IDENT ArrayIndex {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::ARRAY;
-    exp->array_ident = *($1);
-    exp->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$2);
-    $$ = exp;
-}
-| STRING {
-    auto exp = new Exp();
-    exp->expType = Exp::ExpType::STR;
-    exp->is_str = true;
-    exp->str = *($1);
-    $$ = exp;
-}*/
 
 Cond
 : LOrExp {
@@ -766,6 +674,15 @@ UnaryExp
     unaryExp->unaryExpType = UnaryExpType::OP_Exp;
     unaryExp->op = "&";
     unaryExp->ident = *($2);
+    $$ = unaryExp;
+}
+| '&' IDENT ArrayIndex {
+    auto unaryExp = new UnaryExp();
+    unaryExp->unaryExpType = UnaryExpType::OP_Exp;
+    unaryExp->op = "&";
+    unaryExp->ident = *($2);
+    unaryExp->ptr_to_array = true;
+    unaryExp->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )$3);
     $$ = unaryExp;
 }
 
@@ -932,9 +849,8 @@ EqExp
     eqExp->eqExp = shared_ptr<EqExp>((EqExp* )$1);
     eqExp->op = "!=";
 
-    eqExp->is_rel_exp = eqExp->relExp->is_exp;
-
     eqExp->relExp = shared_ptr<RelExp>((RelExp* )$3);
+    eqExp->is_rel_exp = eqExp->relExp->is_exp;
     $$ = eqExp;
 }
 
@@ -969,7 +885,7 @@ LOrExp
 }
 
 INCLUDE_STMT
-: INCLUDE '<' FILE_NAME '>' {
+: INCLUDE FILE_NAME {
     //fprintf(stderr, "Error: Include statement is not supported\n");
 }
 
