@@ -70,8 +70,13 @@ inline void SymbolTable::new_regs(int id) {
         fprintf(stderr, "Invalid register id!\n");
         exit(1);
     }
+    assembly_code.push_back("// ask for register: " + to_string(id));
+    assembly_code.push_back("// regs_used: " + to_string(regs_used[id]));
     if (regs_used[id] > 0) {
         assembly_code.push_back("\tpush  " + param_regs[id]);
+        if (id == 0 || id == 1) {
+            assembly_code.push_back("// regs_used: " + to_string(regs_used[0]) + " " + to_string(regs_used[1]));
+        }
         push_cnt++;
     }
     regs_used[id]++;
@@ -83,6 +88,8 @@ inline void SymbolTable::free_regs(int id) {
         exit(1);
     }
     regs_used[id]--;
+    assembly_code.push_back("// free register: " + to_string(id));
+    assembly_code.push_back("// regs_used: " + to_string(regs_used[id]));
     if (regs_used[id] > 0) {
         assembly_code.push_back("\tpop  " + param_regs[id]);
         push_cnt--; 
@@ -203,6 +210,8 @@ inline int CodeGenerator::search_const_str(string str) {
 }
 
 pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_ptr<Tree> node) {
+    std::cerr << typeid(*node).name() << endl;
+
     if (typeid(*node) == typeid(Exp))
         return handle_exp(table, dynamic_pointer_cast<Exp>(node)->add_exp);
     
@@ -374,6 +383,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 std::cerr << "function name: " << unary_exp->func_ident << std::endl;
                 exit(1);
             }
+            std::cerr << "call function: " << unary_exp->func_ident << endl;
             int param_num = unary_exp->funcRParamList ? unary_exp->funcRParamList->exps.size() : 0;
             if (!check_is_lib(symbol->name)) {
                 if (param_num != symbol.get()->param_num) {
@@ -393,6 +403,10 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 if ((param_num - param_reg_num + table->push_cnt) & 1)
                     table->assembly_code.push_back("\tsub  rsp, 8");
             }
+            else {
+                if (table->push_cnt & 1)
+                    table->assembly_code.push_back("\tsub  rsp, 8");
+            }
 
             for (int i = param_num - 1; i >= 0; i--) {
                 pair<bool, int> res = handle_exp(table, unary_exp->funcRParamList->exps[i]);
@@ -408,6 +422,10 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 int align_size = ((param_num - param_reg_num + table->push_cnt) & 1);
                 table->assembly_code.push_back("\tadd  rsp, " + to_string((param_num - param_reg_num + align_size) * 8));
             }
+            else {
+                if (table->push_cnt & 1)
+                    table->assembly_code.push_back("\tadd  rsp, 8");
+            }
             
             for (int i = param_num - 1; i >= 0; i--) {
                 if (i >= param_reg_num)
@@ -418,8 +436,8 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
             return make_pair(false, 1);
         }
         else if (unary_exp->unaryExpType == UnaryExpType::OP_Exp) {
-            pair<bool, int> res = handle_exp(table, unary_exp->unary_exp);
             if (unary_exp->op == "-") {
+                pair<bool, int> res = handle_exp(table, unary_exp->unary_exp);
                 if (res.first)
                     return make_pair(true, -res.second);
                 else {
@@ -427,8 +445,26 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     return make_pair(false, 1);
                 }
             }
+            else if (unary_exp->op == "+") {
+                return handle_exp(table, unary_exp->unary_exp);
+            }
+            else if (unary_exp->op == "!") {
+                pair<bool, int> res = handle_exp(table, unary_exp->unary_exp);
+                if (res.first) {
+                    if (res.second == 0)
+                        return make_pair(true, 1);
+                    else
+                        return make_pair(true, 0);
+                }
+                else {
+                    table->assembly_code.push_back("\tcmp  eax, 0");
+                    table->assembly_code.push_back("\tsete al");
+                    table->assembly_code.push_back("\tmovzx  eax, al");
+                    return make_pair(false, 1);
+                }
+            }
             else if (unary_exp->op == "&") {
-                shared_ptr<VarSymbol> symbol = dynamic_pointer_cast<VarSymbol>(lookup(table, unary_exp->ident));
+                shared_ptr<SymbolType> symbol = lookup(table, unary_exp->ident);
                 if (symbol == nullptr) {
                     fprintf(stderr, "Error: %s\n", "Variable not declared");
                     fprintf(stderr, "Variable name: %s\n", unary_exp->ident.c_str());
@@ -436,11 +472,74 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     fprintf(stderr, "Table scope: %d\n", table->level);
                     exit(1);
                 }
-                if (symbol->kind == VarSymbol::VarKind::INT)
-                    table->assembly_code.push_back("\tlea  rax, [rbp" + to_string(symbol->offset) + "]");
-                else if (symbol->kind == VarSymbol::VarKind::GLOBAL_INT)
-                    table->assembly_code.push_back("\tlea  rax, " + symbol->name + "[rip]"); // TODO: check this
-                return make_pair(false, 1);
+                std::cerr << "get address of " << unary_exp->ident << endl;
+                if (typeid(*symbol) == typeid(VarSymbol)) {
+                    shared_ptr<VarSymbol> var_symbol = dynamic_pointer_cast<VarSymbol>(symbol);
+                    if (var_symbol->kind == VarSymbol::VarKind::INT || var_symbol->kind == VarSymbol::VarKind::CONST_INT)
+                        table->assembly_code.push_back("\tlea  rax, [rbp" + to_string(var_symbol->offset) + "]");
+                    else if (var_symbol->kind == VarSymbol::VarKind::GLOBAL_INT || var_symbol->kind == VarSymbol::VarKind::GLOBAL_CONST)
+                        table->assembly_code.push_back("\tmov  rax, qword ptr " + var_symbol->name + "@GOTPCREL[rip]");
+                }
+                else if (typeid(*symbol) == typeid(ArraySymbol)) {
+                    shared_ptr<ArraySymbol> arr_symbol = dynamic_pointer_cast<ArraySymbol>(symbol);
+                    int exp_num = unary_exp->arrayIndex->exps.size();
+                    if (exp_num > arr_symbol->dim) {
+                        fprintf(stderr, "Error: %s\n", "Too many dimensions!");
+                        exit(1);
+                    }
+
+                    bool is_const = true;
+                    int addr = 0;
+                    for (int i = 0; i < exp_num - 1; i++) {
+                        pair<bool, int> res = handle_exp(table, unary_exp->arrayIndex->exps[i]);
+                        is_const = is_const && res.first;
+                        addr += res.second;
+                        addr *= arr_symbol->dim_size[i + 1];
+                    }
+                    pair<bool, int> res = handle_exp(table, unary_exp->arrayIndex->exps[exp_num - 1]);
+                    is_const = is_const && res.first;
+                    addr += res.second;
+
+                    if (is_const) {
+                        if (arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT || arr_symbol->kind == ArraySymbol::ArrayKind::INT)
+                            table->assembly_code.push_back("\tlea  rax, [rbp " + to_string(arr_symbol->offset + addr * 4) + " ]");
+                        else if (arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT || arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
+                            table->assembly_code.push_back("\tmov  rax, qword ptr " + arr_symbol->name + "@GOTPCREL[rip]");  
+                            table->assembly_code.push_back("\tlea  rax, [rax + " + to_string(addr * 4) + "]");
+                        }
+                        else if (arr_symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
+                            table->assembly_code.push_back("\tmov  rax, qword ptr [rbp" + to_string(arr_symbol->offset) + "]");
+                            table->assembly_code.push_back("\tlea  rax, [rax + " + to_string(addr * 4) + "]");
+                        }
+                    }
+
+                    // using register r8 to store the address of the array
+                    table->new_regs(4);
+                    table->assembly_code.push_back("\txor  r8, r8");
+
+                    for (int i = 0; i < exp_num - 1; i++) {
+                        pair<bool, int> res = handle_exp(table, unary_exp->arrayIndex->exps[i]);
+                        table->assembly_code.push_back("\tadd  r8,  " + judge_const(res));
+                        table->assembly_code.push_back("\timul r8, " + to_string(arr_symbol->dim_size[i + 1]));
+                    }
+                    res = handle_exp(table, unary_exp->arrayIndex->exps[exp_num - 1]);
+                    table->assembly_code.push_back("\tadd  r8, " + judge_const(res));
+
+                    if (arr_symbol->kind == ArraySymbol::ArrayKind::INT || arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT) {
+                        table->assembly_code.push_back("\tlea  rax, [rbp" + to_string(arr_symbol->offset) + " + r8 * 4]");
+                        table->free_regs(4);
+                    }
+                    else if (arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT || arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
+                        table->assembly_code.push_back("\tmov  rax,  qword ptr " + arr_symbol->name + "@GOTPCREL[rip]");
+                        table->assembly_code.push_back("\tlea  rax, [rax + r8 * 4]");
+                        table->free_regs(4);
+                    }
+                    else if (arr_symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
+                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp" + to_string(arr_symbol->offset) + "]");
+                        table->assembly_code.push_back("\tlea  rax, [rax + r8 * 4]");
+                        table->free_regs(4);
+                    }
+                }
             }
         }
     }
@@ -458,7 +557,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 fprintf(stderr, "Table scope: %d\n", table->level);
                 exit(1);
             }
-            if /*(primary_exp->lVal->varKind == VarKind::Var)*/ (typeid(*symbol) == typeid(VarSymbol)) {
+            if (typeid(*symbol) == typeid(VarSymbol)) {
                 shared_ptr<VarSymbol> var_symbol = dynamic_pointer_cast<VarSymbol>(symbol);
                 if (var_symbol->kind == VarSymbol::VarKind::INT) {
                     table->assembly_code.push_back("\tmov  eax, dword ptr [rbp" + to_string(var_symbol->offset) + "]");
@@ -479,7 +578,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     return make_pair(true, var_symbol->value);
                 }
             }
-            else if /*(primary_exp->lVal->varKind == VarKind::Array)*/ (typeid(*symbol) == typeid(ArraySymbol)) {
+            else if (typeid(*symbol) == typeid(ArraySymbol)) {
                 if (primary_exp->lVal->varKind == VarKind::Array) {
                     shared_ptr<ArraySymbol> arr_symbol = dynamic_pointer_cast<ArraySymbol>(symbol);
                     int exp_num = primary_exp->lVal->arrayIndex->exps.size();
@@ -501,12 +600,9 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                         is_const = is_const && res.first;
                         addr += res.second;
 
-                        if (!is_const) {
-                            fprintf(stderr, "Error: can not get a const value from const array!\n");
-                            exit(1);
+                        if (is_const) {
+                            return make_pair(true, arr_symbol->const_val[addr]);
                         }
-
-                        return make_pair(true, arr_symbol->const_val[addr]);
                     }
 
                     // using register r8 to store the address of the array
@@ -521,22 +617,20 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[exp_num - 1]);
                     table->assembly_code.push_back("\tadd  r8, " + judge_const(res));
 
-                    if (arr_symbol->kind == ArraySymbol::ArrayKind::INT) {
+                    if (arr_symbol->kind == ArraySymbol::ArrayKind::INT || arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT) {
                         table->assembly_code.push_back("\tmov  eax, dword ptr [rbp" + to_string(arr_symbol->offset) + " + r8 * 4]");
                         table->free_regs(4);
                         return make_pair(false, 1);
                     }
-                    else if (arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT) {
+                    else if (arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT || arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
                         table->assembly_code.push_back("\tmov  rax,  qword ptr " + arr_symbol->name + "@GOTPCREL[rip]");
                         table->assembly_code.push_back("\tmov  eax, dword ptr [rax + r8 * 4]");
                         table->free_regs(4);
                         return make_pair(false, 1);
                     }
                     else if (arr_symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
-                        table->new_regs(5);
-                        table->assembly_code.push_back("\tmov  r9, qword ptr [rbp" + to_string(arr_symbol->offset) + "]");
-                        table->assembly_code.push_back("\tmov  eax, dword ptr [r9 + r8 * 4]");
-                        table->free_regs(5);
+                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp" + to_string(arr_symbol->offset) + "]");
+                        table->assembly_code.push_back("\tmov  eax, dword ptr [rax + r8 * 4]");
                         table->free_regs(4);
                         return make_pair(false, 1);
                     }
@@ -568,6 +662,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
         }
         else if (primary_exp->primaryExpType == PrimaryExpType::String) {
             int str_num = search_const_str(primary_exp->str);
+            std::cerr << "string: " << primary_exp->str << endl;
             table->assembly_code.push_back("\tlea  rax, .LC" + to_string(str_num) + "[rip]");
             return make_pair(false, 1);
         }
@@ -1033,15 +1128,14 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
     // if the label == -1, then it means the control flow can move to the next statement directly
     if (typeid(*node) == typeid(Exp)) {
         pair<bool, int> res = handle_exp(table, dynamic_pointer_cast<Exp>(node));
+        table->assembly_code.push_back("// handle cond exp");
         if (res.first) {
             table->assembly_code.push_back("\tmov  eax, " + to_string(res.second)); // Can be optimized
             if (res.second) {
-                if (true_label > 0)
-                    table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
+                table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
             }
             else {
-                if (false_label > 0)
-                    table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
+                table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
             }
         }
         else {
@@ -1054,12 +1148,15 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
     }
     else if (typeid(*node) == typeid(Cond)) {
         shared_ptr<Cond> cond = dynamic_pointer_cast<Cond>(node);
+        table->assembly_code.push_back("// handle cond cond");
         handle_cond(table, cond->lOrExp, true_label, false_label);
     }
     else if (typeid(*node) == typeid(LOrExp)) {
         shared_ptr<LOrExp> lOrExp = dynamic_pointer_cast<LOrExp>(node);
-        if (lOrExp->lOrExpType == LOrExpType::LAndExp)
+        if (lOrExp->lOrExpType == LOrExpType::LAndExp) {
+            table->assembly_code.push_back("// handle cond lAndExp");
             handle_cond(table, lOrExp->lAndExp, true_label, false_label);
+        } 
         else if (lOrExp->lOrExpType == LOrExpType::LOrLAndExp) {
             int new_false_label = table->new_label();
             handle_cond(table, lOrExp->lOrExp, true_label, new_false_label);
@@ -1069,8 +1166,10 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
     }
     else if (typeid(*node) == typeid(LAndExp)) {
         shared_ptr<LAndExp> lAndExp = dynamic_pointer_cast<LAndExp>(node);
-        if (lAndExp->lAndExpType == LAndExpType::EqExp)
+        if (lAndExp->lAndExpType == LAndExpType::EqExp) {
+            table->assembly_code.push_back("// handle cond eqExp");
             handle_cond(table, lAndExp->eqExp, true_label, false_label);
+        }
         else if (lAndExp->lAndExpType == LAndExpType::LAndEqExp) {
             int new_true_label = table->new_label();
             handle_cond(table, lAndExp->lAndExp, new_true_label, false_label);
@@ -1080,8 +1179,10 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
     }
     else if (typeid(*node) == typeid(EqExp)) {
         shared_ptr<EqExp> eqExp = dynamic_pointer_cast<EqExp>(node);
-        if (eqExp->eqExpType == EqExpType::RelExp)
+        if (eqExp->eqExpType == EqExpType::RelExp) {
+            table->assembly_code.push_back("// handle cond relExp");
             handle_cond(table, eqExp->relExp, true_label, false_label);
+        }
         else if (eqExp->eqExpType == EqExpType::EqRelExp) {
             if (eqExp->is_rel_exp && eqExp->eqExp->is_rel_exp) {
                 pair<bool, int> res2 = handle_exp(table, eqExp->relExp->exp);
@@ -1098,56 +1199,54 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                 if (eqExp->op == "==") {
                     if (res1.first && res2.first) {
                         if (res1.second == res2.second) {
-                            if (true_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
                         }
                         else {
-                            if (false_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
                         }
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
                         table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
                         table->free_regs(3);
                     }
-                    else if ((!res1.first) && res2.first)
+                    else if ((!res1.first) && res2.first) {
+                        table->assembly_code.push_back("\tcdqe");
                         table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                    }
                     else {
-                        table->assembly_code.push_back("\tcmp  rax, rcx");
+                        table->assembly_code.push_back("\tcmp  eax, ecx");
                         table->free_regs(3);
                     }
-                    if (true_label > 0)
-                        table->assembly_code.push_back("\tje  .L" + to_string(true_label));
-                    if (false_label > 0)
-                        table->assembly_code.push_back("\tjne  .L" + to_string(false_label));
+                    table->assembly_code.push_back("\tje  .L" + to_string(true_label));
+                    table->assembly_code.push_back("\tjne  .L" + to_string(false_label));
                 }
                 else if (eqExp->op == "!=") {
                     if (res1.first && res2.first) {
                         if (res1.second != res2.second) {
-                            if (true_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
                         }
                         else {
-                            if (false_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
                         }
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
                         table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
                         table->free_regs(3);
                     }
-                    else if ((!res1.first) && res2.first)
+                    else if ((!res1.first) && res2.first) {
+                        table->assembly_code.push_back("\tcdqe");
                         table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                    } 
                     else {
-                        table->assembly_code.push_back("\tcmp  rax, rcx");
+                        table->assembly_code.push_back("\tcmp  eax, ecx");
                         table->free_regs(3);
                     }
-                    if (true_label > 0)
-                        table->assembly_code.push_back("\tjne  .L" + to_string(true_label));
-                    if (false_label > 0)
-                        table->assembly_code.push_back("\tje  .L" + to_string(false_label));
+                    table->assembly_code.push_back("\tjne  .L" + to_string(true_label));
+                    table->assembly_code.push_back("\tje  .L" + to_string(false_label));
                 }
             }
             else {
@@ -1159,7 +1258,7 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
     else if (typeid(*node) == typeid(RelExp)) {
         shared_ptr<RelExp> relExp = dynamic_pointer_cast<RelExp>(node);
         if (relExp->relExpType == RelExpType::Exp)
-            handle_exp(table, relExp->exp);
+            handle_cond(table, relExp->exp, true_label, false_label);
         else if (relExp->relExpType == RelExpType::RelExp) {
             if (relExp->relExp->is_exp) {
                 pair<bool, int> res2 = handle_exp(table, relExp->exp);
@@ -1176,110 +1275,106 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                 if (relExp->op == "\\<") {
                     if (res1.first && res2.first) {
                         if (res1.second < res2.second) {
-                            if (true_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
                         }
                         else {
-                            if (false_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
                         }
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
                         table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
                         table->free_regs(3);
                     }
-                    else if ((!res1.first) && res2.first)
+                    else if ((!res1.first) && res2.first) {
+                        table->assembly_code.push_back("\tcdqe");
                         table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                    } 
                     else {
-                        table->assembly_code.push_back("\tcmp  rax, rcx");
+                        table->assembly_code.push_back("\tcmp  eax, ecx");
                         table->free_regs(3);
                     }
-                    if (true_label > 0)
-                        table->assembly_code.push_back("\tjl  .L" + to_string(true_label));
-                    if (false_label > 0)
-                        table->assembly_code.push_back("\tjge  .L" + to_string(false_label));
+                    table->assembly_code.push_back("\tjl  .L" + to_string(true_label));
+                    table->assembly_code.push_back("\tjge  .L" + to_string(false_label));
                 }
                 else if (relExp->op == "\\<=") {
                     if (res1.first && res2.first) {
                         if (res1.second <= res2.second) {
-                            if (true_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
                         }
                         else {
-                            if (false_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
                         }
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
                         table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
                         table->free_regs(3);
                     }
-                    else if ((!res1.first) && res2.first)
+                    else if ((!res1.first) && res2.first) {
+                        table->assembly_code.push_back("\tcdqe");
                         table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                    } 
                     else {
-                        table->assembly_code.push_back("\tcmp  rax, rcx");
+                        table->assembly_code.push_back("\tcmp  eax, ecx");
                         table->free_regs(3);
                     }
-                    if (true_label > 0)
-                        table->assembly_code.push_back("\tjle  .L" + to_string(true_label));
-                    if (false_label > 0)
-                        table->assembly_code.push_back("\tjg  .L" + to_string(false_label));
+                    table->assembly_code.push_back("\tjle  .L" + to_string(true_label));
+                    table->assembly_code.push_back("\tjg  .L" + to_string(false_label));
                 }
                 else if (relExp->op == "\\>") {
                     if (res1.first && res2.first) {
                         if (res1.second > res2.second) {
-                            if (true_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
                         }
                         else {
-                            if (false_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
                         }
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
                         table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
                         table->free_regs(3);
                     }
-                    else if ((!res1.first) && res2.first)
+                    else if ((!res1.first) && res2.first) {
+                        table->assembly_code.push_back("\tcdqe");
                         table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                    }
                     else {
-                        table->assembly_code.push_back("\tcmp  rax, rcx");
+                        table->assembly_code.push_back("\tcmp  eax, ecx");
                         table->free_regs(3);
                     }
-                    if (true_label > 0)
-                        table->assembly_code.push_back("\tjg  .L" + to_string(true_label));
-                    if (false_label > 0)
-                        table->assembly_code.push_back("\tjle  .L" + to_string(false_label));
+                    table->assembly_code.push_back("\tjg  .L" + to_string(true_label));
+                    table->assembly_code.push_back("\tjle  .L" + to_string(false_label));
                 }
                 else if (relExp->op == "\\>=") {
                     if (res1.first && res2.first) {
                         if (res1.second >= res2.second) {
-                            if (true_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(true_label));
                         }
                         else {
-                            if (false_label > 0)
-                                table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
+                            table->assembly_code.push_back("\tjmp  .L" + to_string(false_label));
                         }
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
                         table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
                         table->free_regs(3);
                     }
-                    else if ((!res1.first) && res2.first)
+                    else if ((!res1.first) && res2.first) {
+                        table->assembly_code.push_back("\tcdqe");
                         table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                    }
                     else {
-                        table->assembly_code.push_back("\tcmp  rax, rcx");
+                        table->assembly_code.push_back("\tcmp  eax, ecx");
                         table->free_regs(3);
-                    }  
-                    if (true_label > 0)
-                        table->assembly_code.push_back("\tjge  .L" + to_string(true_label));
-                    if (false_label > 0)
-                        table->assembly_code.push_back("\tjl  .L" + to_string(false_label));
+                    }
+                    table->assembly_code.push_back("\tjge  .L" + to_string(true_label));
+                    table->assembly_code.push_back("\tjl  .L" + to_string(false_label));
                 }
             }
             else {
@@ -1387,9 +1482,6 @@ void CodeGenerator::traverse(shared_ptr<SymbolTable> table, shared_ptr<Tree> nod
         shared_ptr<CompList> compList = dynamic_pointer_cast<CompList>(node);
         for (auto declOrDef : compList->declOrDefs)
             traverse(table, declOrDef);
-        //traverse(table, compList->declOrDef);
-        //if (compList->if_more_CompList)
-            //traverse(table, compList->compList);
     }
     else if (typeid(*node) == typeid(DeclOrDef)) {
         shared_ptr<DeclOrDef> declOrDef = dynamic_pointer_cast<DeclOrDef>(node);
@@ -1411,9 +1503,6 @@ void CodeGenerator::traverse(shared_ptr<SymbolTable> table, shared_ptr<Tree> nod
             traverse(table, constDecl->constDefList);
         }
     }
-    /*else if (typeid(*node) == typeid(VarDecl)) {
-        
-    }*/
     else if (typeid(*node) == typeid(VarDefList)) {
         shared_ptr<VarDefList> varDefList = dynamic_pointer_cast<VarDefList>(node);
         for (auto varDef : varDefList->vardefs)
@@ -1428,7 +1517,6 @@ void CodeGenerator::traverse(shared_ptr<SymbolTable> table, shared_ptr<Tree> nod
     else if (typeid(*node) == typeid(FuncDef)) {
         shared_ptr<FuncDef> funcDef = dynamic_pointer_cast<FuncDef>(node);
         shared_ptr<SymbolTable> func_table = handle_funcDef(table, funcDef);
-        //handle_block(func_table, funcDef->block);
         traverse(func_table, funcDef->block);
     }
 
@@ -1446,74 +1534,99 @@ void CodeGenerator::traverse(shared_ptr<SymbolTable> table, shared_ptr<Tree> nod
     }
     else if (typeid(*node) == typeid(Stmt)) {
         shared_ptr<Stmt> stmt = dynamic_pointer_cast<Stmt>(node);
-        if (stmt->stmtType == StmtType::Assign)
+        if (stmt->stmtType == StmtType::Assign) {
+            std::cerr << "enter assign\n";
             handle_assign(table, stmt);
-        else if (stmt->stmtType == StmtType::Exp)
+        }
+        else if (stmt->stmtType == StmtType::Exp) {
+            std::cerr << "enter exp\n";
             handle_exp(table, stmt->exp);
+        } 
         else if (stmt->stmtType == StmtType::Block) {
             table->enter_scope();
             traverse(table, stmt->block);
             table->exit_scope();
         }
         else if (stmt->stmtType == StmtType::If) {
+            std::cerr << "enter if\n";
+            int true_label = table->new_label();
             int end_label = table->new_label();
 
-            handle_cond(table, stmt->cond, -1, end_label);
-
-            traverse(table, stmt->block);
+            handle_cond(table, stmt->cond, true_label, end_label);
+            table->assembly_code.push_back(".L" + to_string(true_label) + ":");
+            table->assembly_code.push_back("// this is true label of if");
+            traverse(table, stmt->stmt_if);
             table->assembly_code.push_back(".L" + to_string(end_label) + ":");
-            // handle condition
+            table->assembly_code.push_back("// this is the end of if");
         }
         else if (stmt->stmtType == StmtType::IfElse) {
+            std::cerr << "enter if else\n";
+            int true_label = table->new_label();
             int else_label = table->new_label();
             int end_label = table->new_label();
 
-            handle_cond(table, stmt->cond, -1, else_label);
-
+            handle_cond(table, stmt->cond, true_label, else_label);
+            table->assembly_code.push_back(".L" + to_string(true_label) + ":");
+            table->assembly_code.push_back("// jump to true label of if-else");
             traverse(table, stmt->stmt_if);
             table->assembly_code.push_back("\tjmp  .L" + to_string(end_label));
+            table->assembly_code.push_back("// jump to end label of if-else");
 
             table->assembly_code.push_back(".L" + to_string(else_label) + ":");
+            table->assembly_code.push_back("// this is the else label of if-else");
             traverse(table, stmt->stmt_if_else);
 
             table->assembly_code.push_back(".L" + to_string(end_label) + ":");
+            table->assembly_code.push_back("// this is the end label of if-else");
         }
         else if (stmt->stmtType == StmtType::While) {
-            //handle_return(func_table, stmt);
+            std::cerr << "enter while\n";
             int start_label = table->new_label();
+            int true_label = table->new_label();
             int end_label = table->new_label();
 
             table->push_loop_labels(start_label, end_label);
 
             table->assembly_code.push_back(".L" + to_string(start_label) + ":");
+            table->assembly_code.push_back("// start of while");
 
-            handle_cond(table, stmt->cond, -1, end_label);
+            handle_cond(table, stmt->cond, true_label, end_label);
+
+            table->assembly_code.push_back(".L" + to_string(true_label) + ":");
+            table->assembly_code.push_back("// true label of while");
 
             traverse(table, stmt->stmt_while);
 
             table->assembly_code.push_back("\tjmp  .L" + to_string(start_label));
+            table->assembly_code.push_back("// jump to start label of while");
 
             table->assembly_code.push_back(".L" + to_string(end_label) + ":");
+            table->assembly_code.push_back("// end of while");
 
             table->pop_loop_labels();
         }
         else if (stmt->stmtType == StmtType::Break) {
+            std::cerr << "enter break\n";
             int loop_end = table->get_loop_end();
             if (loop_end == -1) {
                 fprintf(stderr, "Error: %s\n", "Break statement not in loop");
                 exit(1);
             }
             table->assembly_code.push_back("\tjmp  .L" + to_string(loop_end));
+            table->assembly_code.push_back("// break: jump to end label of loop");
         }
         else if (stmt->stmtType == StmtType::Continue) {
+            std::cerr << "enter continue\n";
             int loop_start = table->get_loop_start();
             if (loop_start == -1) {
                 fprintf(stderr, "Error: %s\n", "Continue statement not in loop");
                 exit(1);
             }
             table->assembly_code.push_back("\tjmp  .L" + to_string(loop_start));
+            table->assembly_code.push_back("// continue: jump to start label of loop");
         }
         else if (stmt->stmtType == StmtType::Return) {
+            std::cerr << "enter return\n";
             if (table->curr_func_kind == SymbolType::FuncKind::INT) {
                 fprintf(stderr, "Error: %s\n", "Return nothing in int function");
                 exit(1);
@@ -1523,8 +1636,10 @@ void CodeGenerator::traverse(shared_ptr<SymbolTable> table, shared_ptr<Tree> nod
                 exit(1);
             }
             table->assembly_code.push_back("\tjmp  .L" + to_string(table->get_func_ret_label()));
+            table->assembly_code.push_back("// return: jump to return label of function");
         }
         else if (stmt->stmtType == StmtType::ReturnExp) {
+            std::cerr << "enter return exp\n";
             if (table->curr_func_kind == SymbolType::FuncKind::VOID) {
                 fprintf(stderr, "Error: %s\n", "Return value in void function");
                 exit(1);
@@ -1537,6 +1652,7 @@ void CodeGenerator::traverse(shared_ptr<SymbolTable> table, shared_ptr<Tree> nod
             if (res.first)
                 table->assembly_code.push_back("\tmov  eax, " + to_string(res.second));
             table->assembly_code.push_back("\tjmp  .L" + to_string(table->get_func_ret_label()));
+            table->assembly_code.push_back("// return: jump to return label of function");
         }
     }
 }
