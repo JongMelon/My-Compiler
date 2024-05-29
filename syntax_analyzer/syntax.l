@@ -30,7 +30,16 @@ line_break [\n]+
 comment_line \/\/[^\n]*
 comment_block \/\*([^*]|\*[^/])*\*\/
 
+STRING_LITERAL \"([^\\"]|\\.)*\"
+
+FILE_NAME [a-zA-Z_\-\.]+
+
 %%
+
+"#include" {
+    yylval.sval = new string(yytext);
+    return INCLUDE;
+}
 
 "int" {
     return INT;
@@ -116,6 +125,16 @@ comment_block \/\*([^*]|\*[^/])*\*\/
     return RIGHTBRACE;
 }
 
+"-" {
+    return MINUS;
+}
+
+{STRING_LITERAL} {
+    yytext[strlen(yytext) - 1] = '\0';
+    yylval.sval = new string(yytext + 1);
+    return STRING;
+}
+
 {id} {
     yylval.sval = new string(yytext);
     return IDENT;
@@ -139,6 +158,11 @@ comment_block \/\*([^*]|\*[^/])*\*\/
 {hex_num} {
     yylval.ival = strtol(yytext, nullptr, 16);
     return INTCONST;
+}
+
+{FILE_NAME} {
+    yylval.sval = new string(yytext);
+    return FILE_NAME;
 }
 
 {blank} {}
