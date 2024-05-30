@@ -1,11 +1,18 @@
 #include "Trans.h"
 
+inline string my_to_string(int val) {
+    if (val < 0)
+        return to_string(val);
+    string res = "+" + to_string(val);
+    return res;
+}
+
 SymbolTable::SymbolTable(SymbolTable::Scope scope, string local_label) {
     this->scope = scope;
     if (scope == SymbolTable::Scope::LOCAL)
         this->local_label = local_label;
 
-    table.push_back(unordered_map<string, shared_ptr<SymbolType>>());
+    map_table.push_back(unordered_map<string, shared_ptr<SymbolType>>());
     level = 0;
 
     func_ret_label = new_label();
@@ -13,23 +20,23 @@ SymbolTable::SymbolTable(SymbolTable::Scope scope, string local_label) {
 
 shared_ptr<SymbolType> SymbolTable::lookup(string name) {
     for (int i = level; i >= 0; i--) {
-        if (table[i].find(name) != table[i].end())
-            return table[i][name];
+        if (map_table[i].find(name) != map_table[i].end())
+            return map_table[i][name];
     }
         return nullptr;
 }
 
 void SymbolTable::insert(string name, shared_ptr<SymbolType> symbol) {
-    table[level][name] = symbol;
+    map_table[level][name] = symbol;
 }
 
 void SymbolTable::enter_scope() {
-    table.push_back(unordered_map<string, shared_ptr<SymbolType>>());
+    map_table.push_back(unordered_map<string, shared_ptr<SymbolType>>());
     level++;
 }
 
 void SymbolTable::exit_scope() {
-    table.pop_back();
+    map_table.pop_back();
     level--;
 }
 
@@ -70,13 +77,11 @@ inline void SymbolTable::new_regs(int id) {
         fprintf(stderr, "Invalid register id!\n");
         exit(1);
     }
-    assembly_code.push_back("// ask for register: " + to_string(id));
-    assembly_code.push_back("// regs_used: " + to_string(regs_used[id]));
+    assembly_code.push_back("// ask for register: " + my_to_string(id));
+    assembly_code.push_back("// regs_used: " + my_to_string(regs_used[id]));
+    //regs_once_used[id] = true;
     if (regs_used[id] > 0) {
         assembly_code.push_back("\tpush  " + param_regs[id]);
-        if (id == 0 || id == 1) {
-            assembly_code.push_back("// regs_used: " + to_string(regs_used[0]) + " " + to_string(regs_used[1]));
-        }
         push_cnt++;
     }
     regs_used[id]++;
@@ -88,11 +93,31 @@ inline void SymbolTable::free_regs(int id) {
         exit(1);
     }
     regs_used[id]--;
-    assembly_code.push_back("// free register: " + to_string(id));
-    assembly_code.push_back("// regs_used: " + to_string(regs_used[id]));
+    assembly_code.push_back("// free register: " + my_to_string(id));
+    assembly_code.push_back("// regs_used: " + my_to_string(regs_used[id]));
     if (regs_used[id] > 0) {
         assembly_code.push_back("\tpop  " + param_regs[id]);
         push_cnt--; 
+    }
+}
+
+inline void SymbolTable::save_regs() {
+    assembly_code.push_back("// save caller-saved registers");
+    for (int i = 0; i < param_reg_num; i++) {
+        //if (regs_once_used[i]) {
+            assembly_code.push_back("\tpush  " + param_regs[i]);
+            push_cnt++;
+        //}
+    }
+}
+
+inline void SymbolTable::restore_regs() {
+    assembly_code.push_back("// restore caller-saved registers");
+    for (int i = param_reg_num - 1; i >= 0; i--) {
+        //if (regs_once_used[i]) {
+            assembly_code.push_back("\tpop  " + param_regs[i]);
+            push_cnt--;
+        //}
     }
 }
 
@@ -121,13 +146,13 @@ string CodeGenerator::judge_const(pair<bool, int>& res, bool is_rax) {
 
 void CodeGenerator::fill_zero(shared_ptr<SymbolTable> table, int array_base, int offset, int fill_size) {
     if (fill_size < 2) {
-        table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(array_base + offset * 4) + "], 0");
+        table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(array_base + offset * 4) + "], 0");
         return;
     }
 
     table->new_regs(3);
 
-    table->assembly_code.push_back("\tlea  rdi, [rbp" + to_string(array_base + offset * 4) + "]");
+    table->assembly_code.push_back("\tlea  rdi, [rbp" + my_to_string(array_base + offset * 4) + "]");
     table->assembly_code.push_back("\tmov  rcx, " + to_string(fill_size / 2));
     table->assembly_code.push_back("\tmov  rax, 0");
     table->assembly_code.push_back("\trep stosq");
@@ -231,29 +256,30 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
         if (add_exp->addExpType == AddExpType::MulExp)
             return handle_exp(table, add_exp->mul_exp);
         else if (add_exp->addExpType == AddExpType::AddMulExp) {
-            pair<bool, int> res2 = handle_exp(table, add_exp->mul_exp);
-            if (!res2.first) {
+            pair<bool, int> res1 = handle_exp(table, add_exp->add_exp);
+            if (!res1.first) {
                 table->new_regs(3);
                 table->assembly_code.push_back("\tpush  rax");
                 table->push_cnt++;
             }
-            pair<bool, int> res1 = handle_exp(table, add_exp->add_exp);
-            if (!res2.first) {
+            pair<bool, int> res2 = handle_exp(table, add_exp->mul_exp);
+            if (!res1.first) {
                 table->assembly_code.push_back("\tpop  rcx");
                 table->push_cnt--;
-            }
+            } // rcx = exp1, rax = exp2
 
             if (add_exp->op == "+") {
                 if ((!res1.first) && (!res2.first)) {
                     table->assembly_code.push_back("\tadd  eax, ecx");
                     table->free_regs(3);
                 }
-                else if ((!res1.first) && res2.first)
-                    table->assembly_code.push_back("\tadd  eax, " + to_string(res2.second));
-                else if (res1.first && (!res2.first)) {
-                    table->assembly_code.push_back("\tadd  ecx, " + to_string(res1.second));
-                    table->assembly_code.push_back("\tmov  ecx, eax");
+                else if ((!res1.first) && res2.first) {
+                    table->assembly_code.push_back("\tadd  ecx, " + to_string(res2.second));
+                    table->assembly_code.push_back("\tmov  eax, ecx");
                     table->free_regs(3);
+                } 
+                else if (res1.first && (!res2.first)) {
+                    table->assembly_code.push_back("\tadd  eax, " + to_string(res1.second));
                 }
                 else
                     return make_pair(true, res1.second + res2.second);
@@ -262,14 +288,16 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
             else if (add_exp->op == "-") {
                 if ((!res1.first) && (!res2.first)) {
                     table->assembly_code.push_back("\tsub  eax, ecx");
+                    table->assembly_code.push_back("\tneg  eax");
                     table->free_regs(3);
                 }
-                else if ((!res1.first) && res2.first)
-                    table->assembly_code.push_back("\tsub  eax, " + to_string(res2.second));
-                else if (res1.first && (!res2.first)) {
-                    table->assembly_code.push_back("\tsub  ecx, " + to_string(res1.second));
+                else if ((!res1.first) && res2.first) {
+                    table->assembly_code.push_back("\tsub  ecx, " + to_string(res2.second));
                     table->assembly_code.push_back("\tmov  eax, ecx");
                     table->free_regs(3);
+                }
+                else if (res1.first && (!res2.first)) {
+                    table->assembly_code.push_back("\tsub  eax, " + to_string(res1.second));
                 }  
                 else
                     return make_pair(true, res1.second - res2.second);
@@ -283,31 +311,31 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
         if (mul_exp->mulExpType == MulExpType::UnaryExp)
             return handle_exp(table, mul_exp->unary_exp);
         else if (mul_exp->mulExpType == MulExpType::MulUnaryExp) {
-            pair<bool, int> res2 = handle_exp(table, mul_exp->unary_exp);
-            if (!res2.first) {
+            pair<bool, int> res1 = handle_exp(table, mul_exp->mul_exp);
+            if (!res1.first) {
                 table->new_regs(3);
                 table->assembly_code.push_back("\tpush  rax");
                 table->push_cnt++;
             }
-            pair<bool, int> res1 = handle_exp(table, mul_exp->mul_exp);
-            if (!res2.first) {
+            pair<bool, int> res2 = handle_exp(table, mul_exp->unary_exp);
+            if (!res1.first) {
                 table->assembly_code.push_back("\tpop  rcx"); // now rax = exp2, rcx = exp1
                 table->push_cnt--;
             }
 
             if (mul_exp->op == "*") {
                 if ((!res1.first) && (!res2.first)) {
-                    table->assembly_code.push_back("\timul eax, ecx");
+                    table->assembly_code.push_back("\timul  eax, ecx");
                     table->free_regs(3);
                 }
                 else if ((!res1.first) && res2.first) {
                     //table->assembly_code.push_back("\tmov  eax, ecx");
-                    table->assembly_code.push_back("\timul eax, " + to_string(res2.second));
-                }
-                else if (res1.first && (!res2.first)) {
-                    table->assembly_code.push_back("\timul ecx, " + to_string(res1.second));
+                    table->assembly_code.push_back("\timul  ecx, " + to_string(res2.second));
                     table->assembly_code.push_back("\tmov  eax, ecx");
                     table->free_regs(3);
+                }
+                else if (res1.first && (!res2.first)) {
+                    table->assembly_code.push_back("\timul  eax, " + to_string(res1.second));
                 }
                 else
                     return make_pair(true, res1.second * res2.second);
@@ -315,6 +343,11 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
             }
             else if (mul_exp->op == "/") {
                 if ((!res1.first) && (!res2.first)) {
+                    // swap ecx and eax
+                    table->assembly_code.push_back("\tpush  rax");
+                    table->assembly_code.push_back("\tpush  rcx");
+                    table->assembly_code.push_back("\tpop  rax");
+                    table->assembly_code.push_back("\tpop  rcx");
                     table->new_regs(2);
                     //table->new_regs(3);
                     table->assembly_code.push_back("\tcdq");
@@ -322,14 +355,16 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 }
                 else if ((!res1.first) && res2.first) {
                     table->new_regs(2);
-                    table->new_regs(3);
+                    //table->new_regs(3);
+                    table->assembly_code.push_back("\tmov  eax, ecx");
                     table->assembly_code.push_back("\tcdq");
                     table->assembly_code.push_back("\tmov  ecx, " + to_string(res2.second));
                     table->assembly_code.push_back("\tidiv ecx");
                 }
                 else if (res1.first && (!res2.first)) {
                     table->new_regs(2);
-                    //table->new_regs(3);
+                    table->new_regs(3);
+                    table->assembly_code.push_back("\tmov  ecx, eax");
                     table->assembly_code.push_back("\tmov  eax, " + to_string(res1.second));
                     table->assembly_code.push_back("\tcdq");
                     table->assembly_code.push_back("\tidiv ecx");
@@ -343,13 +378,18 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
             else if (mul_exp->op == "%") {
                 if ((!res1.first) && (!res2.first)) {
                     table->new_regs(2);
+                    table->assembly_code.push_back("\tpush  rax");
+                    table->assembly_code.push_back("\tpush  rcx");
+                    table->assembly_code.push_back("\tpop  rax");
+                    table->assembly_code.push_back("\tpop  rcx");
                     //table->new_regs(3);
                     table->assembly_code.push_back("\tcdq");
                     table->assembly_code.push_back("\tidiv ecx");
                 }
                 else if ((!res1.first) && res2.first) {
                     table->new_regs(2);
-                    table->new_regs(3);
+                    //table->new_regs(3);
+                    table->assembly_code.push_back("\tmov  eax, ecx");
                     table->assembly_code.push_back("\tcdq");
                     table->assembly_code.push_back("\tmov  ecx, " + to_string(res2.second));
                     table->assembly_code.push_back("\tidiv ecx");
@@ -357,7 +397,8 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 }
                 else if (res1.first && (!res2.first)) {
                     table->new_regs(2);
-                    //table->new_regs(3);
+                    table->new_regs(3);
+                    table->assembly_code.push_back("\tmov  ecx, eax");
                     table->assembly_code.push_back("\tmov  eax, " + to_string(res1.second));
                     table->assembly_code.push_back("\tcdq");
                     table->assembly_code.push_back("\tidiv ecx");
@@ -391,47 +432,54 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     exit(1);
                 }
             }
-            //table->store_regs();
+
+            table->save_regs();
+
+            table->assembly_code.push_back("//now push cnt: " + to_string(table->push_cnt));
+
+            int align_cnt = table->push_cnt;
 
             for (int i = 0; i < param_num; i++) {
-                if (i >= param_reg_num)
-                    break;
-                table->new_regs(i);
-            }
+                if (i == param_reg_num) {
+                    align_cnt = table->push_cnt + (param_num - param_reg_num);
 
-            if (param_num > param_reg_num) {
-                if ((param_num - param_reg_num + table->push_cnt) & 1)
-                    table->assembly_code.push_back("\tsub  rsp, 8");
-            }
-            else {
-                if (table->push_cnt & 1)
-                    table->assembly_code.push_back("\tsub  rsp, 8");
-            }
-
-            for (int i = param_num - 1; i >= 0; i--) {
+                    table->assembly_code.push_back("\tsub  rsp, " + to_string((param_num - param_reg_num + (align_cnt & 1)) * 8));
+                    table->push_cnt = align_cnt;
+                }
                 pair<bool, int> res = handle_exp(table, unary_exp->funcRParamList->exps[i]);
                 if (i < param_reg_num) {
+                    table->new_regs(i);
                     table->assembly_code.push_back("\tmov  " + param_regs[i] + ", " + judge_const(res));
                 }
-                else
-                    table->assembly_code.push_back("\tpush  " + judge_const(res));
+                else {
+                    table->assembly_code.push_back("\tmov  qword ptr [rsp + " + to_string((i - param_reg_num) * 8) + "], " + judge_const(res));
+                }
             }
+
+            if (param_num <= param_reg_num) {
+                align_cnt = table->push_cnt;
+                if (align_cnt & 1)
+                    table->assembly_code.push_back("\tsub  rsp, 8");
+            }
+
             table->assembly_code.push_back("\txor  eax, eax");
             table->assembly_code.push_back("\tcall  " + symbol.get()->name);
-            if (param_num > param_reg_num) {
-                int align_size = ((param_num - param_reg_num + table->push_cnt) & 1);
-                table->assembly_code.push_back("\tadd  rsp, " + to_string((param_num - param_reg_num + align_size) * 8));
-            }
-            else {
-                if (table->push_cnt & 1)
+
+            if (param_num <= param_reg_num) {
+                if (align_cnt & 1)
                     table->assembly_code.push_back("\tadd  rsp, 8");
             }
-            
-            for (int i = param_num - 1; i >= 0; i--) {
-                if (i >= param_reg_num)
-                    continue;
-                table->free_regs(i);
+            else {
+                table->assembly_code.push_back("\tadd  rsp, " + to_string((param_num - param_reg_num + (align_cnt & 1)) * 8));
+                table->push_cnt -= (param_num - param_reg_num);
             }
+
+            for (int i = param_num - 1; i >= 0; i--) {
+                if (i < param_reg_num)
+                    table->free_regs(i);
+            }
+            
+            table->restore_regs();
 
             return make_pair(false, 1);
         }
@@ -476,7 +524,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 if (typeid(*symbol) == typeid(VarSymbol)) {
                     shared_ptr<VarSymbol> var_symbol = dynamic_pointer_cast<VarSymbol>(symbol);
                     if (var_symbol->kind == VarSymbol::VarKind::INT || var_symbol->kind == VarSymbol::VarKind::CONST_INT)
-                        table->assembly_code.push_back("\tlea  rax, [rbp" + to_string(var_symbol->offset) + "]");
+                        table->assembly_code.push_back("\tlea  rax, [rbp" + my_to_string(var_symbol->offset) + "]");
                     else if (var_symbol->kind == VarSymbol::VarKind::GLOBAL_INT || var_symbol->kind == VarSymbol::VarKind::GLOBAL_CONST)
                         table->assembly_code.push_back("\tmov  rax, qword ptr " + var_symbol->name + "@GOTPCREL[rip]");
                 }
@@ -502,14 +550,14 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
 
                     if (is_const) {
                         if (arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT || arr_symbol->kind == ArraySymbol::ArrayKind::INT)
-                            table->assembly_code.push_back("\tlea  rax, [rbp " + to_string(arr_symbol->offset + addr * 4) + " ]");
+                            table->assembly_code.push_back("\tlea  rax, [rbp " + my_to_string(arr_symbol->offset + addr * 4) + " ]");
                         else if (arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT || arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
                             table->assembly_code.push_back("\tmov  rax, qword ptr " + arr_symbol->name + "@GOTPCREL[rip]");  
-                            table->assembly_code.push_back("\tlea  rax, [rax + " + to_string(addr * 4) + "]");
+                            table->assembly_code.push_back("\tlea  rax, [rax " + my_to_string(addr * 4) + "]");
                         }
                         else if (arr_symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
-                            table->assembly_code.push_back("\tmov  rax, qword ptr [rbp" + to_string(arr_symbol->offset) + "]");
-                            table->assembly_code.push_back("\tlea  rax, [rax + " + to_string(addr * 4) + "]");
+                            table->assembly_code.push_back("\tmov  rax, qword ptr [rbp " + my_to_string(arr_symbol->offset) + "]");
+                            table->assembly_code.push_back("\tlea  rax, [rax " + my_to_string(addr * 4) + "]");
                         }
                     }
 
@@ -520,13 +568,13 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     for (int i = 0; i < exp_num - 1; i++) {
                         pair<bool, int> res = handle_exp(table, unary_exp->arrayIndex->exps[i]);
                         table->assembly_code.push_back("\tadd  r8,  " + judge_const(res));
-                        table->assembly_code.push_back("\timul r8, " + to_string(arr_symbol->dim_size[i + 1]));
+                        table->assembly_code.push_back("\timul r8, " + my_to_string(arr_symbol->dim_size[i + 1]));
                     }
                     res = handle_exp(table, unary_exp->arrayIndex->exps[exp_num - 1]);
                     table->assembly_code.push_back("\tadd  r8, " + judge_const(res));
 
                     if (arr_symbol->kind == ArraySymbol::ArrayKind::INT || arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT) {
-                        table->assembly_code.push_back("\tlea  rax, [rbp" + to_string(arr_symbol->offset) + " + r8 * 4]");
+                        table->assembly_code.push_back("\tlea  rax, [rbp" + my_to_string(arr_symbol->offset) + " + r8 * 4]");
                         table->free_regs(4);
                     }
                     else if (arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT || arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
@@ -535,7 +583,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                         table->free_regs(4);
                     }
                     else if (arr_symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
-                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp" + to_string(arr_symbol->offset) + "]");
+                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp " + my_to_string(arr_symbol->offset) + "]");
                         table->assembly_code.push_back("\tlea  rax, [rax + r8 * 4]");
                         table->free_regs(4);
                     }
@@ -560,7 +608,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
             if (typeid(*symbol) == typeid(VarSymbol)) {
                 shared_ptr<VarSymbol> var_symbol = dynamic_pointer_cast<VarSymbol>(symbol);
                 if (var_symbol->kind == VarSymbol::VarKind::INT) {
-                    table->assembly_code.push_back("\tmov  eax, dword ptr [rbp" + to_string(var_symbol->offset) + "]");
+                    table->assembly_code.push_back("\tmov  eax, dword ptr [rbp" + my_to_string(var_symbol->offset) + "]");
                     return make_pair(false, 1);
                 }
                 else if (var_symbol->kind == VarSymbol::VarKind::GLOBAL_INT) {
@@ -569,7 +617,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     return make_pair(false, 1);
                 }
                 else if (var_symbol->kind == VarSymbol::VarKind::CONST_INT) {
-                    //table->assembly_code.push_back("\tmov  eax, " + to_string(symbol->value));
+                    //table->assembly_code.push_back("\tmov  eax, " + my_to_string(symbol->value));
                     std::cerr << "const int: " << var_symbol->value << endl;
                     return make_pair(true, var_symbol->value);
                 }
@@ -582,8 +630,11 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 if (primary_exp->lVal->varKind == VarKind::Array) {
                     shared_ptr<ArraySymbol> arr_symbol = dynamic_pointer_cast<ArraySymbol>(symbol);
                     int exp_num = primary_exp->lVal->arrayIndex->exps.size();
-                    if (exp_num != arr_symbol->dim) {
+                    if (exp_num > arr_symbol->dim) {
                         fprintf(stderr, "Error: %s\n", "Number of dimensions does not match");
+                        std::cerr << "table name: " << table->local_label << endl;
+                        std::cerr << "array name: " << primary_exp->lVal->ident << endl;
+                        std::cerr << "exp_num: " << exp_num << " dim: " << arr_symbol->dim << endl;
                         exit(1);
                     }
 
@@ -609,28 +660,48 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     table->new_regs(4);
                     table->assembly_code.push_back("\txor  r8, r8");
 
-                    for (int i = 0; i < exp_num - 1; i++) {
-                        pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[i]);
-                        table->assembly_code.push_back("\tadd  r8,  " + judge_const(res));
-                        table->assembly_code.push_back("\timul r8, " + to_string(arr_symbol->dim_size[i + 1]));
+                    if (exp_num == arr_symbol->dim) {
+                        for (int i = 0; i < exp_num - 1; i++) {
+                            pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[i]);
+                            table->assembly_code.push_back("\tadd  r8,  " + judge_const(res));
+                            table->assembly_code.push_back("\timul  r8, " + to_string(arr_symbol->dim_size[i + 1]));
+                        }
+                        pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[exp_num - 1]);
+                        table->assembly_code.push_back("\tadd  r8, " + judge_const(res));
                     }
-                    pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[exp_num - 1]);
-                    table->assembly_code.push_back("\tadd  r8, " + judge_const(res));
+                    else {
+                        for (int i = 0; i < exp_num; i++) {
+                            pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[i]);
+                            table->assembly_code.push_back("\tadd  r8,  " + judge_const(res));
+                            table->assembly_code.push_back("\timul  r8, " + to_string(arr_symbol->dim_size[i + 1]));
+                        }
+                    }
 
                     if (arr_symbol->kind == ArraySymbol::ArrayKind::INT || arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT) {
-                        table->assembly_code.push_back("\tmov  eax, dword ptr [rbp" + to_string(arr_symbol->offset) + " + r8 * 4]");
+                        if (exp_num < arr_symbol->dim) {
+                            // convert to a poiner
+                            table->assembly_code.push_back("\tlea  rax, [rbp" + my_to_string(arr_symbol->offset) + " + r8 * 4]");
+                        }
+                        else
+                            table->assembly_code.push_back("\tmov  eax, dword ptr [rbp" + my_to_string(arr_symbol->offset) + " + r8 * 4]");
                         table->free_regs(4);
                         return make_pair(false, 1);
                     }
                     else if (arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT || arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
                         table->assembly_code.push_back("\tmov  rax,  qword ptr " + arr_symbol->name + "@GOTPCREL[rip]");
-                        table->assembly_code.push_back("\tmov  eax, dword ptr [rax + r8 * 4]");
+                        if (exp_num < arr_symbol->dim)
+                            table->assembly_code.push_back("\tlea  rax, [rax + r8 * 4]");
+                        else
+                            table->assembly_code.push_back("\tmov  eax, dword ptr [rax + r8 * 4]");
                         table->free_regs(4);
                         return make_pair(false, 1);
                     }
                     else if (arr_symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
-                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp" + to_string(arr_symbol->offset) + "]");
-                        table->assembly_code.push_back("\tmov  eax, dword ptr [rax + r8 * 4]");
+                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp " + my_to_string(arr_symbol->offset) + "]");
+                        if (exp_num < arr_symbol->dim)
+                            table->assembly_code.push_back("\tlea  rax, [rax + r8 * 4]");
+                        else
+                            table->assembly_code.push_back("\tmov  eax, dword ptr [rax + r8 * 4]");
                         table->free_regs(4);
                         return make_pair(false, 1);
                     }
@@ -639,7 +710,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     // convert array to pointer
                     shared_ptr<ArraySymbol> ptr_symbol = dynamic_pointer_cast<ArraySymbol>(symbol);
                     if (ptr_symbol->kind == ArraySymbol::ArrayKind::INT || ptr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT) {
-                        table->assembly_code.push_back("\tlea  rax, [rbp" + to_string(ptr_symbol->offset) + "]");
+                        table->assembly_code.push_back("\tlea  rax, [rbp" + my_to_string(ptr_symbol->offset) + "]");
                         return make_pair(false, 1);
                     }
                     else if (ptr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT) {
@@ -647,7 +718,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                         return make_pair(false, 1);
                     }
                     else if (ptr_symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
-                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp" + to_string(ptr_symbol->offset) + "]");
+                        table->assembly_code.push_back("\tmov  rax, qword ptr [rbp " + my_to_string(ptr_symbol->offset) + "]");
                         return make_pair(false, 1);
                     }
                     else if (ptr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
@@ -740,12 +811,12 @@ int CodeGenerator::handle_arr_initval(shared_ptr<SymbolTable> table, shared_ptr<
         }
         else {
             if (res.first) {
-                table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(array->offset + offset * 4) + "], " + to_string(res.second));
+                table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(array->offset + offset * 4) + "], " + to_string(res.second));
                 if (array->kind == ArraySymbol::ArrayKind::CONST_INT)
                     array->const_val.push_back(res.second); 
             }
             else {
-                table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(array->offset + offset * 4) + "], eax");
+                table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(array->offset + offset * 4) + "], eax");
                 if (array->kind == ArraySymbol::ArrayKind::CONST_INT) {
                     fprintf(stderr, "Error: %s\n", "Initialize const array with non-const exp");
                     exit(1);
@@ -759,7 +830,7 @@ int CodeGenerator::handle_arr_initval(shared_ptr<SymbolTable> table, shared_ptr<
         if (init_val->initValList == nullptr) {
             // fill this dimension with 0, using rep stosq
             if (array->kind == ArraySymbol::ArrayKind::GLOBAL_INT || array->kind == ArraySymbol::ArrayKind::GLOBAL_CONST)
-                global_data.push_back("\t.zero  " + to_string(max_size * 4));
+                global_data.push_back("\t.zero  " + my_to_string(max_size * 4));
             else {
                 fill_zero(table, array->offset, offset, max_size);
                 if (array->kind == ArraySymbol::ArrayKind::CONST_INT) {
@@ -815,7 +886,7 @@ int CodeGenerator::handle_arr_initval(shared_ptr<SymbolTable> table, shared_ptr<
                     if (next_filled < next_align_size) {
                         // fill with 0
                         if (array->kind == ArraySymbol::ArrayKind::GLOBAL_INT)
-                            global_data.push_back("\t.zero  " + to_string((next_align_size - next_filled) * 4));
+                            global_data.push_back("\t.zero  " + my_to_string((next_align_size - next_filled) * 4));
                         else {
                             fill_zero(table, array->offset, offset + filled_size + next_filled, next_align_size - next_filled);
                             if (array->kind == ArraySymbol::ArrayKind::CONST_INT) {
@@ -829,11 +900,11 @@ int CodeGenerator::handle_arr_initval(shared_ptr<SymbolTable> table, shared_ptr<
             }
             if (filled_size < max_size) {
                 if (array->kind == ArraySymbol::ArrayKind::GLOBAL_INT)
-                    global_data.push_back("\t.zero  " + to_string((max_size - filled_size) * 4));
-                    //global_decl.push_back("\t.zero  " + to_string((max_size - filled_size) * 4));
+                    global_data.push_back("\t.zero  " + my_to_string((max_size - filled_size) * 4));
+                    //global_decl.push_back("\t.zero  " + my_to_string((max_size - filled_size) * 4));
                 else {
                     fill_zero(table, array->offset, offset + filled_size, max_size - filled_size);
-                    //table->assembly_code.push_back("// dim: " + to_string(dim) + " offset: " + to_string(offset) + " filled_size: " + to_string(filled_size) + " max_size: " + to_string(max_size));
+                    //table->assembly_code.push_back("// dim: " + my_to_string(dim) + " offset: " + my_to_string(offset) + " filled_size: " + my_to_string(filled_size) + " max_size: " + my_to_string(max_size));
                 } 
             }
             return max_size;
@@ -861,7 +932,7 @@ void CodeGenerator::handle_constdef(shared_ptr<SymbolTable> table, shared_ptr<Co
             
             pair<bool, int> res = handle_initval(table, node->constInitVal);
 
-            table->assembly_code.push_back("\tlong  " + to_string(res.second));
+            rdata.push_back("\t.long  " + to_string(res.second));
 
             symbol->value = res.second;
         }
@@ -872,11 +943,11 @@ void CodeGenerator::handle_constdef(shared_ptr<SymbolTable> table, shared_ptr<Co
             pair<bool, int> res = handle_initval(table, node->constInitVal);
 
             if (res.first) {
-                table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(symbol->offset) + "], " + to_string(res.second));
+                table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(symbol->offset) + "], " + to_string(res.second));
                 symbol->value = res.second;
             }
             else
-                table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(symbol->offset) + "], eax");
+                table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(symbol->offset) + "], eax");
         }   
     }
     else if (node->varKind == VarKind::Array) {
@@ -952,7 +1023,7 @@ void CodeGenerator::handle_vardef(shared_ptr<SymbolTable> table, shared_ptr<VarD
             if (symbol->kind == VarSymbol::VarKind::INT) {
                 if (node->initVal) {
                     pair<bool, int> res = handle_initval(table, node->initVal);
-                    table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(symbol->offset) + "], " + judge_const(res, false));
+                    table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(symbol->offset) + "], " + judge_const(res, false));
                 }
             }
             else if (symbol->kind == VarSymbol::VarKind::CONST_INT) {
@@ -960,7 +1031,7 @@ void CodeGenerator::handle_vardef(shared_ptr<SymbolTable> table, shared_ptr<VarD
                     if (node->initVal->exp) {
                         pair<bool, int> res = handle_exp(table, node->initVal->exp);
                         if (res.first) {
-                            table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(symbol->offset) + "], " + to_string(res.second));
+                            table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(symbol->offset) + "], " + to_string(res.second));
                             symbol->value = res.second;
                         }
                         else {
@@ -981,7 +1052,7 @@ void CodeGenerator::handle_vardef(shared_ptr<SymbolTable> table, shared_ptr<VarD
                     pair<bool, int> res = handle_exp(table, node->initVal->exp);
                     if (res.first)
                         global_data.push_back("\t.long  " + to_string(res.second));
-                        //global_decl.push_back("\t.long  " + to_string(res.second));
+                        //global_decl.push_back("\t.long  " + my_to_string(res.second));
                     else {
                         fprintf(stderr, "Error: %s\n", "Initialization of global variable with non-const exp");
                         exit(1);
@@ -1036,7 +1107,7 @@ void CodeGenerator::handle_vardef(shared_ptr<SymbolTable> table, shared_ptr<VarD
             handle_arr_initval(table, symbol, node->initVal, 0, 0);
         }
         else if (symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT)
-            global_data.push_back("\t.zero  " + to_string(symbol->total_size * 4));
+            global_data.push_back("\t.zero  " + my_to_string(symbol->total_size * 4));
     }
 }
 
@@ -1078,7 +1149,7 @@ shared_ptr<SymbolTable> CodeGenerator::handle_funcDef(shared_ptr<SymbolTable> ta
                 if (i < param_reg_num) {
                     table->stack_ptr -= 4;
                     param_symbol->offset = table->stack_ptr;
-                    table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(param_symbol->offset) + "], " + param_regs_32[i]);
+                    table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(param_symbol->offset) + "], " + param_regs_32[i]);
                 }
                 else
                     param_symbol->offset = 16 + (i - param_reg_num) * 8;
@@ -1107,7 +1178,7 @@ shared_ptr<SymbolTable> CodeGenerator::handle_funcDef(shared_ptr<SymbolTable> ta
                 if (i < param_reg_num) {
                     table->stack_ptr -= 8; // a pointer to the array, 8 bytes
                     param_symbol->offset = table->stack_ptr;
-                    table->assembly_code.push_back("\tmov  qword ptr [rbp" + to_string(param_symbol->offset) + "], " + param_regs[i]);
+                    table->assembly_code.push_back("\tmov  qword ptr [rbp" + my_to_string(param_symbol->offset) + "], " + param_regs[i]);
                 }
                 else
                     param_symbol->offset = 16 + (i - param_reg_num) * 8;
@@ -1185,14 +1256,14 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
         }
         else if (eqExp->eqExpType == EqExpType::EqRelExp) {
             if (eqExp->is_rel_exp && eqExp->eqExp->is_rel_exp) {
-                pair<bool, int> res2 = handle_exp(table, eqExp->relExp->exp);
-                if (!res2.first) {
+                pair<bool, int> res1 = handle_exp(table, eqExp->eqExp->relExp->exp);
+                if (!res1.first) {
                     table->new_regs(3);
                     table->assembly_code.push_back("\tpush  rax");
                     table->push_cnt++;
                 }
-                pair<bool, int> res1 = handle_exp(table, eqExp->eqExp->relExp->exp);
-                if (!res2.first) {
+                pair<bool, int> res2 = handle_exp(table, eqExp->relExp->exp);
+                if (!res1.first) {
                     table->assembly_code.push_back("\tpop  rcx");
                     table->push_cnt--;
                 }
@@ -1207,16 +1278,16 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
-                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
-                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
-                        table->free_regs(3);
+                        table->assembly_code.push_back("\tcdqe");
+                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rax");
                     }
                     else if ((!res1.first) && res2.first) {
-                        table->assembly_code.push_back("\tcdqe");
-                        table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
+                        table->assembly_code.push_back("\tcmp  rcx, " + to_string(res2.second));
+                        table->free_regs(3);
                     }
                     else {
-                        table->assembly_code.push_back("\tcmp  eax, ecx");
+                        table->assembly_code.push_back("\tcmp  ecx, eax");
                         table->free_regs(3);
                     }
                     table->assembly_code.push_back("\tje  .L" + to_string(true_label));
@@ -1233,16 +1304,16 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
-                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
-                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
-                        table->free_regs(3);
+                        table->assembly_code.push_back("\tcdqe");
+                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rax");
                     }
                     else if ((!res1.first) && res2.first) {
-                        table->assembly_code.push_back("\tcdqe");
-                        table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
+                        table->assembly_code.push_back("\tcmp  rcx, " + to_string(res2.second));
+                        table->free_regs(3);
                     } 
                     else {
-                        table->assembly_code.push_back("\tcmp  eax, ecx");
+                        table->assembly_code.push_back("\tcmp  ecx, eax");
                         table->free_regs(3);
                     }
                     table->assembly_code.push_back("\tjne  .L" + to_string(true_label));
@@ -1261,14 +1332,14 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
             handle_cond(table, relExp->exp, true_label, false_label);
         else if (relExp->relExpType == RelExpType::RelExp) {
             if (relExp->relExp->is_exp) {
-                pair<bool, int> res2 = handle_exp(table, relExp->exp);
-                if (!res2.first) {
+                pair<bool, int> res1 = handle_exp(table, relExp->relExp->exp);
+                if (!res1.first) {
                     table->new_regs(3);
                     table->assembly_code.push_back("\tpush  rax");
                     table->push_cnt++;
                 }
-                pair<bool, int> res1 = handle_exp(table, relExp->relExp->exp);
-                if (!res2.first) {
+                pair<bool, int> res2 = handle_exp(table, relExp->exp);
+                if (!res1.first) {
                     table->assembly_code.push_back("\tpop  rcx");
                     table->push_cnt--;
                 }
@@ -1283,16 +1354,16 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
-                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
-                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
-                        table->free_regs(3);
+                        table->assembly_code.push_back("\tcdqe"); 
+                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rax");
                     }
                     else if ((!res1.first) && res2.first) {
-                        table->assembly_code.push_back("\tcdqe");
-                        table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
+                        table->assembly_code.push_back("\tcmp  rcx, " + to_string(res2.second));
+                        table->free_regs(3);
                     } 
                     else {
-                        table->assembly_code.push_back("\tcmp  eax, ecx");
+                        table->assembly_code.push_back("\tcmp  ecx, eax");
                         table->free_regs(3);
                     }
                     table->assembly_code.push_back("\tjl  .L" + to_string(true_label));
@@ -1309,16 +1380,16 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
-                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
-                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
-                        table->free_regs(3);
+                        table->assembly_code.push_back("\tcdqe");
+                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rax");
                     }
                     else if ((!res1.first) && res2.first) {
-                        table->assembly_code.push_back("\tcdqe");
-                        table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
+                        table->assembly_code.push_back("\tcmp  rcx, " + to_string(res2.second));
+                        table->free_regs(3);
                     } 
                     else {
-                        table->assembly_code.push_back("\tcmp  eax, ecx");
+                        table->assembly_code.push_back("\tcmp  ecx, eax");
                         table->free_regs(3);
                     }
                     table->assembly_code.push_back("\tjle  .L" + to_string(true_label));
@@ -1335,16 +1406,16 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
-                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
-                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
-                        table->free_regs(3);
+                        table->assembly_code.push_back("\tcdqe");
+                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rax");
                     }
                     else if ((!res1.first) && res2.first) {
-                        table->assembly_code.push_back("\tcdqe");
-                        table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
+                        table->assembly_code.push_back("\tcmp  rcx, " + to_string(res2.second));
+                        table->free_regs(3);
                     }
                     else {
-                        table->assembly_code.push_back("\tcmp  eax, ecx");
+                        table->assembly_code.push_back("\tcmp  ecx, eax");
                         table->free_regs(3);
                     }
                     table->assembly_code.push_back("\tjg  .L" + to_string(true_label));
@@ -1361,16 +1432,16 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
                         return;
                     }
                     else if (res1.first && (!res2.first)) {
-                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
-                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rcx");
-                        table->free_regs(3);
+                        table->assembly_code.push_back("\tcdqe");
+                        table->assembly_code.push_back("\tcmp  " + to_string(res1.second) + ", rax");
                     }
                     else if ((!res1.first) && res2.first) {
-                        table->assembly_code.push_back("\tcdqe");
-                        table->assembly_code.push_back("\tcmp  rax, " + to_string(res2.second));
+                        table->assembly_code.push_back("\tmovsx  rcx, ecx");
+                        table->assembly_code.push_back("\tcmp  rcx, " + to_string(res2.second));
+                        table->free_regs(3);
                     }
                     else {
-                        table->assembly_code.push_back("\tcmp  eax, ecx");
+                        table->assembly_code.push_back("\tcmp  ecx, eax");
                         table->free_regs(3);
                     }
                     table->assembly_code.push_back("\tjge  .L" + to_string(true_label));
@@ -1387,7 +1458,7 @@ void CodeGenerator::handle_cond(shared_ptr<SymbolTable> table, shared_ptr<Tree> 
 
 void CodeGenerator::handle_assign(shared_ptr<SymbolTable> table, shared_ptr<Stmt> node) {
     if (node->lVal->varKind == VarKind::Var) {
-        shared_ptr<VarSymbol> symbol = dynamic_pointer_cast<VarSymbol>(table->lookup(node->lVal->ident));
+        shared_ptr<VarSymbol> symbol = dynamic_pointer_cast<VarSymbol>(lookup(table, node->lVal->ident));
         if (symbol == nullptr) {
             fprintf(stderr, "Error: %s\n", "Variable not declared when assigning");
             fprintf(stderr, "Variable name: %s\n", node->lVal->ident.c_str());
@@ -1398,12 +1469,14 @@ void CodeGenerator::handle_assign(shared_ptr<SymbolTable> table, shared_ptr<Stmt
         }
         if (symbol->kind == VarSymbol::VarKind::INT) {
             pair<bool, int> res = handle_exp(table, node->exp);
-            table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(symbol->offset) + "], " + judge_const(res, false));
+            table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(symbol->offset) + "], " + judge_const(res, false));
         }
         else if (symbol->kind == VarSymbol::VarKind::GLOBAL_INT) {
             pair<bool, int> res = handle_exp(table, node->exp);
-            table->assembly_code.push_back("\tmov  rax,  qword ptr " + symbol->name + "@GOTPCREL[rip]");
-            table->assembly_code.push_back("\tmov  dword ptr [rax], " + judge_const(res, false));
+            table->new_regs(5);
+            table->assembly_code.push_back("\tmov  r9,  qword ptr " + symbol->name + "@GOTPCREL[rip]");
+            table->assembly_code.push_back("\tmov  dword ptr [r9], " + judge_const(res, false));
+            table->free_regs(5);
         }
         else if (symbol->kind == VarSymbol::VarKind::CONST_INT) {
             fprintf(stderr, "Error: %s\n", "Assign to const variable");
@@ -1415,7 +1488,7 @@ void CodeGenerator::handle_assign(shared_ptr<SymbolTable> table, shared_ptr<Stmt
         }
     }
     else {
-        shared_ptr<ArraySymbol> symbol = dynamic_pointer_cast<ArraySymbol>(table->lookup(node->lVal->ident));
+        shared_ptr<ArraySymbol> symbol = dynamic_pointer_cast<ArraySymbol>(lookup(table, node->lVal->ident));
         if (symbol == nullptr) {
             fprintf(stderr, "Error: %s\n", "Array not declared");
             exit(1);
@@ -1432,14 +1505,14 @@ void CodeGenerator::handle_assign(shared_ptr<SymbolTable> table, shared_ptr<Stmt
         for (int i = 0; i < exp_num - 1; i++) {
             pair<bool, int> res = handle_exp(table, node->lVal->arrayIndex->exps[i]);
             table->assembly_code.push_back("\tadd  r8,  " + judge_const(res));
-            table->assembly_code.push_back("\timul r8, " + to_string(symbol->dim_size[i + 1]));
+            table->assembly_code.push_back("\timul r8, " + my_to_string(symbol->dim_size[i + 1]));
         }
         pair<bool, int> res = handle_exp(table, node->lVal->arrayIndex->exps[exp_num - 1]);
         table->assembly_code.push_back("\tadd  r8,  " + judge_const(res));
 
         if (symbol->kind == ArraySymbol::ArrayKind::INT) {
             pair<bool, int> res = handle_exp(table, node->exp);
-            table->assembly_code.push_back("\tmov  dword ptr [rbp" + to_string(symbol->offset) + " + r8 * 4], " + judge_const(res, false));
+            table->assembly_code.push_back("\tmov  dword ptr [rbp" + my_to_string(symbol->offset) + " + r8 * 4], " + judge_const(res, false));
         }
         else if (symbol->kind == ArraySymbol::ArrayKind::GLOBAL_INT) {
             pair<bool, int> res = handle_exp(table, node->exp);
@@ -1449,7 +1522,7 @@ void CodeGenerator::handle_assign(shared_ptr<SymbolTable> table, shared_ptr<Stmt
         else if (symbol->kind == ArraySymbol::ArrayKind::PARAM_PTR) {
             pair<bool, int> res = handle_exp(table, node->exp);
             table->new_regs(5);
-            table->assembly_code.push_back("\tmov  r9, qword ptr [rbp" + to_string(symbol->offset) + "]");
+            table->assembly_code.push_back("\tmov  r9, qword ptr [rbp " + my_to_string(symbol->offset) + "]");
             table->assembly_code.push_back("\tmov  dword ptr [r9 + r8 * 4], " + judge_const(res, false));
             table->free_regs(5);
         }

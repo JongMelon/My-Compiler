@@ -118,7 +118,7 @@ class SymbolTable {
 
         vector<int> regs_used = vector<int>(param_reg_num, 0);
 
-        vector<unordered_map<string, shared_ptr<SymbolType>>> table;
+        vector<unordered_map<string, shared_ptr<SymbolType>>> map_table;
 
         vector<string> header_code;
         vector<string> assembly_code;
@@ -142,6 +142,9 @@ class SymbolTable {
 
         void new_regs(int id);
         void free_regs(int id);
+
+        void save_regs();
+        void restore_regs();
 
         void push_loop_labels(int start, int end);
         void pop_loop_labels();
@@ -199,5 +202,7 @@ class CodeGenerator {
 
         ~CodeGenerator() = default;
 };
+
+inline string my_to_string(int val);
 
 #endif
