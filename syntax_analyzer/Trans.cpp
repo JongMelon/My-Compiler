@@ -104,20 +104,20 @@ inline void SymbolTable::free_regs(int id) {
 inline void SymbolTable::save_regs() {
     assembly_code.push_back("// save caller-saved registers");
     for (int i = 0; i < param_reg_num; i++) {
-        //if (regs_once_used[i]) {
+        if (regs_used[i] > 0) {
             assembly_code.push_back("\tpush  " + param_regs[i]);
             push_cnt++;
-        //}
+        }
     }
 }
 
 inline void SymbolTable::restore_regs() {
     assembly_code.push_back("// restore caller-saved registers");
     for (int i = param_reg_num - 1; i >= 0; i--) {
-        //if (regs_once_used[i]) {
+        if (regs_used[i] > 0) {
             assembly_code.push_back("\tpop  " + param_regs[i]);
             push_cnt--;
-        //}
+        }
     }
 }
 
@@ -448,7 +448,8 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                 }
                 pair<bool, int> res = handle_exp(table, unary_exp->funcRParamList->exps[i]);
                 if (i < param_reg_num) {
-                    table->new_regs(i);
+                    //table->new_regs(i);
+                    table->regs_used[i]++;
                     table->assembly_code.push_back("\tmov  " + param_regs[i] + ", " + judge_const(res));
                 }
                 else {
@@ -476,7 +477,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
 
             for (int i = param_num - 1; i >= 0; i--) {
                 if (i < param_reg_num)
-                    table->free_regs(i);
+                    table->regs_used[i]--;
             }
             
             table->restore_regs();
@@ -533,6 +534,10 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     int exp_num = unary_exp->arrayIndex->exps.size();
                     if (exp_num > arr_symbol->dim) {
                         fprintf(stderr, "Error: %s\n", "Too many dimensions!");
+                        exit(1);
+                    }
+                    if (exp_num < arr_symbol->dim) {
+                        fprintf(stderr, "Error: %s\n", "Can not convert int* []..[] to int* !");
                         exit(1);
                     }
 
@@ -641,18 +646,39 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
                     if (arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT || arr_symbol->kind == ArraySymbol::ArrayKind::GLOBAL_CONST) {
                         bool is_const = true;
                         int addr = 0;
-                        for (int i = 0; i < exp_num - 1; i++) {
-                            pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[i]);
+
+                        if (exp_num == arr_symbol->dim) {
+                            for (int i = 0; i < exp_num - 1; i++) {
+                                pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[i]);
+                                is_const = is_const && res.first;
+                                addr += res.second;
+                                addr *= arr_symbol->dim_size[i + 1];
+                            }
+                            pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[exp_num - 1]);
                             is_const = is_const && res.first;
                             addr += res.second;
-                            addr *= arr_symbol->dim_size[i + 1];
                         }
-                        pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[exp_num - 1]);
-                        is_const = is_const && res.first;
-                        addr += res.second;
+                        else {
+                            for (int i = 0; i < exp_num; i++) {
+                                pair<bool, int> res = handle_exp(table, primary_exp->lVal->arrayIndex->exps[i]);
+                                is_const = is_const && res.first;
+                                addr += res.second;
+                                addr *= arr_symbol->dim_size[i + 1];
+                            }
+                        }
 
                         if (is_const) {
-                            return make_pair(true, arr_symbol->const_val[addr]);
+                            if (exp_num == arr_symbol->dim_size.size())
+                                return make_pair(true, arr_symbol->const_val[addr]);
+                            else {
+                                if(arr_symbol->kind == ArraySymbol::ArrayKind::CONST_INT)
+                                    table->assembly_code.push_back("\tlea  rax, [rbp " + my_to_string(arr_symbol->offset) + " " + my_to_string(addr * 4) + "]");
+                                else {
+                                    table->assembly_code.push_back("\tmov  rax,  qword ptr " + arr_symbol->name + "@GOTPCREL[rip]");
+                                    table->assembly_code.push_back("\tlea  rax, [rax " + my_to_string(addr * 4) + " ]");
+                                }
+                            }
+                                
                         }
                     }
 
@@ -738,7 +764,7 @@ pair<bool, int> CodeGenerator::handle_exp(shared_ptr<SymbolTable> table, shared_
             return make_pair(false, 1);
         }
     }
-
+    fprintf(stderr, "Error: %s\n", "Should not enter here");
     return make_pair(false, 1); // should not enter here
 }
 
