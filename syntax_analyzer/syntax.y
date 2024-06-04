@@ -1,5 +1,5 @@
 %code requires {
-    #include "Trans.h"
+    #include "ASM.h"
 }
 
 %{
@@ -7,12 +7,13 @@
 #include <stdio.h>
 #include <string>
 //#include "Tree.h"
-#include "Trans.h"
+#include "ASM.h"
 
 int yylex(void);
 void yyerror(const char *s);
 
-string file_name = "assembly1.s";
+// default file name
+string file_name = "assembly.s";
 
 %}
 
@@ -895,10 +896,21 @@ void yyerror(const char *s) {
     fprintf(stderr, "%s\n", s);
 }
 
-int main()
+int main(int argc, const char *argv[])
 {
-    freopen("input.c", "r", stdin);
-    freopen("output.dot", "w", stdout);
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <output_file> <input_file>\n", argv[0]);
+        return 1;
+    }
+
+    string input_file = argv[2];
+    file_name = argv[1];
+
+    std::cerr << "input file: " << input_file << std::endl;
+    std::cerr << "output file: " << file_name << std::endl;
+    
+    freopen(argv[2], "r", stdin);
+    freopen("AST.dot", "w", stdout);
     yyparse();
     fclose(stdin);
     fclose(stdout);

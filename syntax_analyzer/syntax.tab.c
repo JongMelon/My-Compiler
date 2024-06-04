@@ -73,15 +73,16 @@
 #include <stdio.h>
 #include <string>
 //#include "Tree.h"
-#include "Trans.h"
+#include "ASM.h"
 
 int yylex(void);
 void yyerror(const char *s);
 
-string file_name = "assembly1.s";
+// default file name
+string file_name = "assembly.s";
 
 
-#line 85 "syntax.tab.c"
+#line 86 "syntax.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -579,18 +580,18 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    58,    58,    72,    78,    91,    97,   104,   110,   118,
-     124,   132,   138,   150,   157,   175,   180,   185,   193,   198,
-     206,   212,   221,   227,   238,   244,   251,   258,   266,   273,
-     281,   289,   300,   306,   316,   322,   327,   335,   343,   355,
-     362,   370,   381,   388,   393,   400,   408,   420,   427,   434,
-     442,   453,   459,   469,   473,   480,   488,   500,   506,   514,
-     521,   526,   532,   538,   545,   553,   560,   565,   570,   575,
-     583,   590,   598,   605,   611,   620,   626,   632,   638,   646,
-     652,   658,   665,   672,   679,   690,   693,   696,   701,   707,
-     717,   723,   731,   739,   749,   755,   763,   773,   782,   790,
-     800,   808,   816,   826,   835,   846,   858,   864,   873,   879,
-     888
+       0,    59,    59,    73,    79,    92,    98,   105,   111,   119,
+     125,   133,   139,   151,   158,   176,   181,   186,   194,   199,
+     207,   213,   222,   228,   239,   245,   252,   259,   267,   274,
+     282,   290,   301,   307,   317,   323,   328,   336,   344,   356,
+     363,   371,   382,   389,   394,   401,   409,   421,   428,   435,
+     443,   454,   460,   470,   474,   481,   489,   501,   507,   515,
+     522,   527,   533,   539,   546,   554,   561,   566,   571,   576,
+     584,   591,   599,   606,   612,   621,   627,   633,   639,   647,
+     653,   659,   666,   673,   680,   691,   694,   697,   702,   708,
+     718,   724,   732,   740,   750,   756,   764,   774,   783,   791,
+     801,   809,   817,   827,   836,   847,   859,   865,   874,   880,
+     889
 };
 #endif
 
@@ -1311,7 +1312,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* CompUnit: INCLUDE_STMT CompList  */
-#line 58 "syntax.y"
+#line 59 "syntax.y"
                         {
     auto compUnit = new CompUnit();
     compUnit->compList = shared_ptr<CompList>((CompList* )(yyvsp[0].tree));
@@ -1324,22 +1325,22 @@ yyreduce:
     auto Code_Generator = new CodeGenerator();
     Code_Generator->dump(shared_ptr<CompUnit>(compUnit), file_name);
 }
-#line 1328 "syntax.tab.c"
+#line 1329 "syntax.tab.c"
     break;
 
   case 3: /* CompList: DecOrDef  */
-#line 72 "syntax.y"
+#line 73 "syntax.y"
            {
     auto compList = new CompList();
     compList->declOrDef = shared_ptr<DeclOrDef>((DeclOrDef* )(yyvsp[0].tree));
     compList->declOrDefs.push_back(compList->declOrDef);
     (yyval.tree) = compList;
 }
-#line 1339 "syntax.tab.c"
+#line 1340 "syntax.tab.c"
     break;
 
   case 4: /* CompList: CompList DecOrDef  */
-#line 78 "syntax.y"
+#line 79 "syntax.y"
                     {
     auto compList = new CompList();
     compList->if_more_CompList = true;
@@ -1351,87 +1352,87 @@ yyreduce:
 
     (yyval.tree) = compList;
 }
-#line 1355 "syntax.tab.c"
+#line 1356 "syntax.tab.c"
     break;
 
   case 5: /* DecOrDef: Decl  */
-#line 91 "syntax.y"
+#line 92 "syntax.y"
        {
     auto decOrDef = new DeclOrDef();
     decOrDef->if_decl = true;
     decOrDef->decl = shared_ptr<Decl>((Decl* )(yyvsp[0].tree));
     (yyval.tree) = decOrDef;
 }
-#line 1366 "syntax.tab.c"
+#line 1367 "syntax.tab.c"
     break;
 
   case 6: /* DecOrDef: FuncDef  */
-#line 97 "syntax.y"
+#line 98 "syntax.y"
           {
     auto decOrDef = new DeclOrDef();
     decOrDef->funcDef = shared_ptr<FuncDef>((FuncDef* )(yyvsp[0].tree));
     (yyval.tree) = decOrDef;
 }
-#line 1376 "syntax.tab.c"
+#line 1377 "syntax.tab.c"
     break;
 
   case 7: /* Decl: ConstDecl  */
-#line 104 "syntax.y"
+#line 105 "syntax.y"
             {
     auto decl = new Decl();
     decl->decType = DecType::ConstDecl;
     decl->constDecl = shared_ptr<ConstDecl>((ConstDecl* )(yyvsp[0].tree));
     (yyval.tree) = decl;
 }
-#line 1387 "syntax.tab.c"
+#line 1388 "syntax.tab.c"
     break;
 
   case 8: /* Decl: VarDecl  */
-#line 110 "syntax.y"
+#line 111 "syntax.y"
           {
     auto decl = new Decl();
     decl->decType = DecType::VarDecl;
     decl->varDecl = shared_ptr<VarDecl>((VarDecl* )(yyvsp[0].tree));
     (yyval.tree) = decl;
 }
-#line 1398 "syntax.tab.c"
+#line 1399 "syntax.tab.c"
     break;
 
   case 9: /* ConstDecl: CONST VarType ConstDefList ';'  */
-#line 118 "syntax.y"
+#line 119 "syntax.y"
                                  {
     auto constDecl = new ConstDecl();
     constDecl->varType = shared_ptr<VarType>((VarType* )(yyvsp[-2].tree));
     constDecl->constDefList = shared_ptr<ConstDefList>((ConstDefList* )(yyvsp[-1].tree));
     (yyval.tree) = constDecl;
 }
-#line 1409 "syntax.tab.c"
+#line 1410 "syntax.tab.c"
     break;
 
   case 10: /* ConstDecl: CONST VarType IDENT ';'  */
-#line 124 "syntax.y"
+#line 125 "syntax.y"
                           {
     fprintf(stderr, "Error: Unknown constdeflist\n");
     auto constDecl = new ConstDecl();
     constDecl->err_empty = true;
     (yyval.tree) = constDecl;
 }
-#line 1420 "syntax.tab.c"
+#line 1421 "syntax.tab.c"
     break;
 
   case 11: /* ConstDefList: ConstDef  */
-#line 132 "syntax.y"
+#line 133 "syntax.y"
            {
     auto constDefList = new ConstDefList();
     constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )(yyvsp[0].tree));
     constDefList->constdefs.push_back(constDefList->constDef);
     (yyval.tree) = constDefList;
 }
-#line 1431 "syntax.tab.c"
+#line 1432 "syntax.tab.c"
     break;
 
   case 12: /* ConstDefList: ConstDefList ',' ConstDef  */
-#line 138 "syntax.y"
+#line 139 "syntax.y"
                             {
     auto constDefList = new ConstDefList();
     constDefList->constDef = shared_ptr<ConstDef>((ConstDef* )(yyvsp[0].tree));
@@ -1442,11 +1443,11 @@ yyreduce:
 
     (yyval.tree) = constDefList;
 }
-#line 1446 "syntax.tab.c"
+#line 1447 "syntax.tab.c"
     break;
 
   case 13: /* ConstDef: IDENT '=' ConstInitVal  */
-#line 150 "syntax.y"
+#line 151 "syntax.y"
                          {
     auto constDef = new ConstDef();
     constDef->varKind = VarKind::Var;
@@ -1454,11 +1455,11 @@ yyreduce:
     constDef->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )(yyvsp[0].tree));
     (yyval.tree) = constDef;
 }
-#line 1458 "syntax.tab.c"
+#line 1459 "syntax.tab.c"
     break;
 
   case 14: /* ConstDef: IDENT ConstArrayIndex '=' InitVal  */
-#line 157 "syntax.y"
+#line 158 "syntax.y"
                                     {
     auto constDef = new ConstDef();
     constDef->varKind = VarKind::Array;
@@ -1467,74 +1468,74 @@ yyreduce:
     constDef->array_initval = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = constDef;
 }
-#line 1471 "syntax.tab.c"
+#line 1472 "syntax.tab.c"
     break;
 
   case 15: /* ConstInitVal: ConstExp  */
-#line 175 "syntax.y"
+#line 176 "syntax.y"
            {
     auto constInitVal = new ConstInitVal();
     constInitVal->constExp = shared_ptr<ConstExp>((ConstExp* )(yyvsp[0].tree));
     (yyval.tree) = constInitVal;
 }
-#line 1481 "syntax.tab.c"
+#line 1482 "syntax.tab.c"
     break;
 
   case 16: /* ConstInitVal: LEFTBRACE RIGHTBRACE  */
-#line 180 "syntax.y"
+#line 181 "syntax.y"
                        {
     auto constInitVal = new ConstInitVal();
     constInitVal->varKind = VarKind::Array;
     (yyval.tree) = constInitVal;
 }
-#line 1491 "syntax.tab.c"
+#line 1492 "syntax.tab.c"
     break;
 
   case 17: /* ConstInitVal: LEFTBRACE ConstInitValList RIGHTBRACE  */
-#line 185 "syntax.y"
+#line 186 "syntax.y"
                                         {
     auto constInitVal = new ConstInitVal();
     constInitVal->varKind = VarKind::Array;
     constInitVal->constInitValList = shared_ptr<ConstInitValList>((ConstInitValList* )(yyvsp[-1].tree));
     (yyval.tree) = constInitVal;
 }
-#line 1502 "syntax.tab.c"
+#line 1503 "syntax.tab.c"
     break;
 
   case 18: /* ConstInitValList: ConstInitVal  */
-#line 193 "syntax.y"
+#line 194 "syntax.y"
                {
     auto constInitValList = new ConstInitValList();
     constInitValList->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )(yyvsp[0].tree));
     (yyval.tree) = constInitValList;
 }
-#line 1512 "syntax.tab.c"
+#line 1513 "syntax.tab.c"
     break;
 
   case 19: /* ConstInitValList: ConstInitVal ',' ConstInitValList  */
-#line 198 "syntax.y"
+#line 199 "syntax.y"
                                     {
     auto constInitValList = new ConstInitValList();
     constInitValList->constInitVal = shared_ptr<ConstInitVal>((ConstInitVal* )(yyvsp[-2].tree));
     constInitValList->constInitValList = shared_ptr<ConstInitValList>((ConstInitValList* )(yyvsp[0].tree));
     (yyval.tree) = constInitValList;
 }
-#line 1523 "syntax.tab.c"
+#line 1524 "syntax.tab.c"
     break;
 
   case 20: /* VarDecl: FuncType VarDefList ';'  */
-#line 206 "syntax.y"
+#line 207 "syntax.y"
                           {
     auto varDecl = new VarDecl();
     varDecl->varDefList = shared_ptr<VarDefList>((VarDefList* )(yyvsp[-1].tree));
     varDecl->vardefs = varDecl->varDefList->vardefs;
     (yyval.tree) = varDecl;
 }
-#line 1534 "syntax.tab.c"
+#line 1535 "syntax.tab.c"
     break;
 
   case 21: /* VarDecl: error VarDefList ';'  */
-#line 212 "syntax.y"
+#line 213 "syntax.y"
                        {
     fprintf(stderr, "Error: Unknown VarType\n");
     auto varDecl = new VarDecl();
@@ -1542,22 +1543,22 @@ yyreduce:
     varDecl->unknownType = true;
     (yyval.tree) = varDecl;
 }
-#line 1546 "syntax.tab.c"
+#line 1547 "syntax.tab.c"
     break;
 
   case 22: /* VarDefList: VarDef  */
-#line 221 "syntax.y"
+#line 222 "syntax.y"
          {
     auto varDefList = new VarDefList();
     varDefList->varDef = shared_ptr<VarDef>((VarDef* )(yyvsp[0].tree));
     varDefList->vardefs.push_back(varDefList->varDef);
     (yyval.tree) = varDefList;
 }
-#line 1557 "syntax.tab.c"
+#line 1558 "syntax.tab.c"
     break;
 
   case 23: /* VarDefList: VarDefList ',' VarDef  */
-#line 227 "syntax.y"
+#line 228 "syntax.y"
                         {
     auto varDefList = new VarDefList();
     varDefList->varDef = shared_ptr<VarDef>((VarDef* )(yyvsp[0].tree));
@@ -1567,22 +1568,22 @@ yyreduce:
     varDefList->vardefs.push_back(varDefList->varDef);
     (yyval.tree) = varDefList;
 }
-#line 1571 "syntax.tab.c"
+#line 1572 "syntax.tab.c"
     break;
 
   case 24: /* VarDef: IDENT  */
-#line 238 "syntax.y"
+#line 239 "syntax.y"
         {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Var;
     varDef->ident = *((yyvsp[0].sval));
     (yyval.tree) = varDef;
 }
-#line 1582 "syntax.tab.c"
+#line 1583 "syntax.tab.c"
     break;
 
   case 25: /* VarDef: IDENT '=' InitVal  */
-#line 244 "syntax.y"
+#line 245 "syntax.y"
                     {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Var;
@@ -1590,11 +1591,11 @@ yyreduce:
     varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1594 "syntax.tab.c"
+#line 1595 "syntax.tab.c"
     break;
 
   case 26: /* VarDef: IDENT ConstArrayIndex  */
-#line 251 "syntax.y"
+#line 252 "syntax.y"
                         {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Array;
@@ -1602,11 +1603,11 @@ yyreduce:
     varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1606 "syntax.tab.c"
+#line 1607 "syntax.tab.c"
     break;
 
   case 27: /* VarDef: IDENT ConstArrayIndex '=' InitVal  */
-#line 258 "syntax.y"
+#line 259 "syntax.y"
                                     {
     auto varDef = new VarDef();
     varDef->varKind = VarKind::Array;
@@ -1615,11 +1616,11 @@ yyreduce:
     varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1619 "syntax.tab.c"
+#line 1620 "syntax.tab.c"
     break;
 
   case 28: /* VarDef: INTCONST IDENT  */
-#line 266 "syntax.y"
+#line 267 "syntax.y"
                  {
     fprintf(stderr, "Error: Invaild ident name\n");
     auto varDef = new VarDef();
@@ -1627,11 +1628,11 @@ yyreduce:
     varDef->ident = *((yyvsp[0].sval));
     (yyval.tree) = varDef;
 }
-#line 1631 "syntax.tab.c"
+#line 1632 "syntax.tab.c"
     break;
 
   case 29: /* VarDef: INTCONST IDENT '=' InitVal  */
-#line 273 "syntax.y"
+#line 274 "syntax.y"
                              {
     fprintf(stderr, "Error: Invaild ident name\n");
     auto varDef = new VarDef();
@@ -1640,11 +1641,11 @@ yyreduce:
     varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1644 "syntax.tab.c"
+#line 1645 "syntax.tab.c"
     break;
 
   case 30: /* VarDef: INTCONST IDENT ConstArrayIndex  */
-#line 281 "syntax.y"
+#line 282 "syntax.y"
                                  {
     fprintf(stderr, "Error: Invaild ident name\n");
     auto varDef = new VarDef();
@@ -1653,11 +1654,11 @@ yyreduce:
     varDef->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1657 "syntax.tab.c"
+#line 1658 "syntax.tab.c"
     break;
 
   case 31: /* VarDef: INTCONST IDENT ConstArrayIndex '=' InitVal  */
-#line 289 "syntax.y"
+#line 290 "syntax.y"
                                              {
     fprintf(stderr, "Error: Invaild ident name\n");
     auto varDef = new VarDef();
@@ -1667,22 +1668,22 @@ yyreduce:
     varDef->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
     (yyval.tree) = varDef;
 }
-#line 1671 "syntax.tab.c"
+#line 1672 "syntax.tab.c"
     break;
 
   case 32: /* ConstArrayIndex: LEFTSQB ConstExp RIGHTSQB  */
-#line 300 "syntax.y"
+#line 301 "syntax.y"
                             {
     auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->const_exp = shared_ptr<ConstExp>((ConstExp* )(yyvsp[-1].tree));
     constArrayIndex->const_exps.push_back(constArrayIndex->const_exp);
     (yyval.tree) = constArrayIndex;
 }
-#line 1682 "syntax.tab.c"
+#line 1683 "syntax.tab.c"
     break;
 
   case 33: /* ConstArrayIndex: ConstArrayIndex LEFTSQB ConstExp RIGHTSQB  */
-#line 306 "syntax.y"
+#line 307 "syntax.y"
                                             {
     auto constArrayIndex = new ConstArrayIndex();
     constArrayIndex->constArrayIndex = shared_ptr<ConstArrayIndex>((ConstArrayIndex* )(yyvsp[-3].tree));
@@ -1691,43 +1692,43 @@ yyreduce:
     constArrayIndex->const_exps.push_back(constArrayIndex->const_exp);
     (yyval.tree) = constArrayIndex;
 }
-#line 1695 "syntax.tab.c"
+#line 1696 "syntax.tab.c"
     break;
 
   case 34: /* InitVal: Exp  */
-#line 316 "syntax.y"
+#line 317 "syntax.y"
       {
     auto initVal = new InitVal();
     initVal->varKind = VarKind::Var;
     initVal->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = initVal;
 }
-#line 1706 "syntax.tab.c"
+#line 1707 "syntax.tab.c"
     break;
 
   case 35: /* InitVal: LEFTBRACE RIGHTBRACE  */
-#line 322 "syntax.y"
+#line 323 "syntax.y"
                        {
     auto initVal = new InitVal();
     initVal->varKind = VarKind::Array;
     (yyval.tree) = initVal;
 }
-#line 1716 "syntax.tab.c"
+#line 1717 "syntax.tab.c"
     break;
 
   case 36: /* InitVal: LEFTBRACE InitValList RIGHTBRACE  */
-#line 327 "syntax.y"
+#line 328 "syntax.y"
                                    {
     auto initVal = new InitVal();
     initVal->varKind = VarKind::Array;
     initVal->initValList = shared_ptr<InitValList>((InitValList* )(yyvsp[-1].tree));
     (yyval.tree) = initVal;
 }
-#line 1727 "syntax.tab.c"
+#line 1728 "syntax.tab.c"
     break;
 
   case 37: /* InitValList: InitVal  */
-#line 335 "syntax.y"
+#line 336 "syntax.y"
           {
     auto initValList = new InitValList();
     initValList->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
@@ -1736,11 +1737,11 @@ yyreduce:
 
     (yyval.tree) = initValList;
 }
-#line 1740 "syntax.tab.c"
+#line 1741 "syntax.tab.c"
     break;
 
   case 38: /* InitValList: InitValList ',' InitVal  */
-#line 343 "syntax.y"
+#line 344 "syntax.y"
                           {
     auto initValList = new InitValList();
     initValList->initVal = shared_ptr<InitVal>((InitVal* )(yyvsp[0].tree));
@@ -1751,11 +1752,11 @@ yyreduce:
 
     (yyval.tree) = initValList;
 }
-#line 1755 "syntax.tab.c"
+#line 1756 "syntax.tab.c"
     break;
 
   case 39: /* FuncDef: FuncType IDENT LPAREN RPAREN Block  */
-#line 355 "syntax.y"
+#line 356 "syntax.y"
                                      {
     auto funcDef = new FuncDef();
     funcDef->funcType = shared_ptr<FuncType>((FuncType* )(yyvsp[-4].tree));
@@ -1763,11 +1764,11 @@ yyreduce:
     funcDef->block = shared_ptr<Block>((Block* )(yyvsp[0].tree));
     (yyval.tree) = funcDef;
 }
-#line 1767 "syntax.tab.c"
+#line 1768 "syntax.tab.c"
     break;
 
   case 40: /* FuncDef: FuncType IDENT LPAREN FuncFParamList RPAREN Block  */
-#line 362 "syntax.y"
+#line 363 "syntax.y"
                                                     {
     auto funcDef = new FuncDef();
     funcDef->funcType = shared_ptr<FuncType>((FuncType* )(yyvsp[-5].tree));
@@ -1776,11 +1777,11 @@ yyreduce:
     funcDef->block = shared_ptr<Block>((Block* )(yyvsp[0].tree));
     (yyval.tree) = funcDef;
 }
-#line 1780 "syntax.tab.c"
+#line 1781 "syntax.tab.c"
     break;
 
   case 41: /* FuncDef: FuncType IDENT LPAREN error RPAREN Block  */
-#line 370 "syntax.y"
+#line 371 "syntax.y"
                                            {
     fprintf(stderr, "Error: Unknown funcfparamlist\n");
     auto funcDef = new FuncDef();
@@ -1790,41 +1791,41 @@ yyreduce:
     funcDef->err_empty = true;
     (yyval.tree) = funcDef;
 }
-#line 1794 "syntax.tab.c"
+#line 1795 "syntax.tab.c"
     break;
 
   case 42: /* VarType: INT  */
-#line 381 "syntax.y"
+#line 382 "syntax.y"
       {
     auto varType = new VarType();
     varType->type = "int";
     (yyval.tree) = varType;
 }
-#line 1804 "syntax.tab.c"
+#line 1805 "syntax.tab.c"
     break;
 
   case 43: /* FuncType: VOID  */
-#line 388 "syntax.y"
+#line 389 "syntax.y"
        {
     auto funcType = new FuncType();
     funcType->type = "void";
     (yyval.tree) = funcType;
 }
-#line 1814 "syntax.tab.c"
+#line 1815 "syntax.tab.c"
     break;
 
   case 44: /* FuncType: INT  */
-#line 393 "syntax.y"
+#line 394 "syntax.y"
       {
     auto funcType = new FuncType();
     funcType->type = "int";
     (yyval.tree) = funcType;
 }
-#line 1824 "syntax.tab.c"
+#line 1825 "syntax.tab.c"
     break;
 
   case 45: /* FuncFParamList: FuncFParam  */
-#line 400 "syntax.y"
+#line 401 "syntax.y"
              {
     auto funcFParamList = new FuncFParamList();
     funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )(yyvsp[0].tree));
@@ -1833,11 +1834,11 @@ yyreduce:
 
     (yyval.tree) = funcFParamList;
 }
-#line 1837 "syntax.tab.c"
+#line 1838 "syntax.tab.c"
     break;
 
   case 46: /* FuncFParamList: FuncFParamList ',' FuncFParam  */
-#line 408 "syntax.y"
+#line 409 "syntax.y"
                                 {
     auto funcFParamList = new FuncFParamList();
     funcFParamList->funcFParam = shared_ptr<FuncFParam>((FuncFParam* )(yyvsp[0].tree));
@@ -1848,11 +1849,11 @@ yyreduce:
 
     (yyval.tree) = funcFParamList;
 }
-#line 1852 "syntax.tab.c"
+#line 1853 "syntax.tab.c"
     break;
 
   case 47: /* FuncFParam: VarType IDENT  */
-#line 420 "syntax.y"
+#line 421 "syntax.y"
                 {
     auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Var;
@@ -1860,11 +1861,11 @@ yyreduce:
     funcFParam->ident = *((yyvsp[0].sval));
     (yyval.tree) = funcFParam;
 }
-#line 1864 "syntax.tab.c"
+#line 1865 "syntax.tab.c"
     break;
 
   case 48: /* FuncFParam: VarType IDENT LEFTSQB RIGHTSQB  */
-#line 427 "syntax.y"
+#line 428 "syntax.y"
                                  {
     auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Array;
@@ -1872,11 +1873,11 @@ yyreduce:
     funcFParam->ident = *((yyvsp[-2].sval));
     (yyval.tree) = funcFParam;
 }
-#line 1876 "syntax.tab.c"
+#line 1877 "syntax.tab.c"
     break;
 
   case 49: /* FuncFParam: VarType IDENT LEFTSQB RIGHTSQB ArrayIndex  */
-#line 434 "syntax.y"
+#line 435 "syntax.y"
                                             {
     auto funcFParam = new FuncFParam();
     funcFParam->varKind = VarKind::Array;
@@ -1885,11 +1886,11 @@ yyreduce:
     funcFParam->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = funcFParam;
 }
-#line 1889 "syntax.tab.c"
+#line 1890 "syntax.tab.c"
     break;
 
   case 50: /* FuncFParam: VarType IDENT LEFTSQB error RIGHTSQB  */
-#line 442 "syntax.y"
+#line 443 "syntax.y"
                                        {
     fprintf(stderr, "Error: Unknown function param\n");
     auto funcFParam = new FuncFParam();
@@ -1899,22 +1900,22 @@ yyreduce:
     funcFParam->err_empty = true;
     (yyval.tree) = funcFParam;
 }
-#line 1903 "syntax.tab.c"
+#line 1904 "syntax.tab.c"
     break;
 
   case 51: /* ArrayIndex: LEFTSQB Exp RIGHTSQB  */
-#line 453 "syntax.y"
+#line 454 "syntax.y"
                        {
     auto arrayIndex = new ArrayIndex();
     arrayIndex->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     arrayIndex->exps.push_back(arrayIndex->exp);
     (yyval.tree) = arrayIndex;
 }
-#line 1914 "syntax.tab.c"
+#line 1915 "syntax.tab.c"
     break;
 
   case 52: /* ArrayIndex: ArrayIndex LEFTSQB Exp RIGHTSQB  */
-#line 459 "syntax.y"
+#line 460 "syntax.y"
                                   {
     auto arrayIndex = new ArrayIndex();
     arrayIndex->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )(yyvsp[-3].tree));
@@ -1923,30 +1924,30 @@ yyreduce:
     arrayIndex->exps.push_back(arrayIndex->exp);
     (yyval.tree) = arrayIndex;
 }
-#line 1927 "syntax.tab.c"
+#line 1928 "syntax.tab.c"
     break;
 
   case 53: /* Block: LEFTBRACE RIGHTBRACE  */
-#line 469 "syntax.y"
+#line 470 "syntax.y"
                        {
     auto block = new Block();
     (yyval.tree) = block;
 }
-#line 1936 "syntax.tab.c"
+#line 1937 "syntax.tab.c"
     break;
 
   case 54: /* Block: LEFTBRACE BlockItemList RIGHTBRACE  */
-#line 473 "syntax.y"
+#line 474 "syntax.y"
                                      {
     auto block = new Block();
     block->blockItemList = shared_ptr<BlockItemList>((BlockItemList* )(yyvsp[-1].tree));
     (yyval.tree) = block;
 }
-#line 1946 "syntax.tab.c"
+#line 1947 "syntax.tab.c"
     break;
 
   case 55: /* BlockItemList: BlockItem  */
-#line 480 "syntax.y"
+#line 481 "syntax.y"
             {
     auto blockItemList = new BlockItemList();
     blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )(yyvsp[0].tree));
@@ -1955,11 +1956,11 @@ yyreduce:
 
     (yyval.tree) = blockItemList;
 }
-#line 1959 "syntax.tab.c"
+#line 1960 "syntax.tab.c"
     break;
 
   case 56: /* BlockItemList: BlockItemList BlockItem  */
-#line 488 "syntax.y"
+#line 489 "syntax.y"
                           {
     auto blockItemList = new BlockItemList();
     blockItemList->blockItem = shared_ptr<BlockItem>((BlockItem* )(yyvsp[0].tree));
@@ -1970,33 +1971,33 @@ yyreduce:
 
     (yyval.tree) = blockItemList;
 }
-#line 1974 "syntax.tab.c"
+#line 1975 "syntax.tab.c"
     break;
 
   case 57: /* BlockItem: Decl  */
-#line 500 "syntax.y"
+#line 501 "syntax.y"
        {
     auto blockItem = new BlockItem();
     blockItem->blockItemType = BlockItemType::Decl;
     blockItem->decl = shared_ptr<Decl>((Decl* )(yyvsp[0].tree));
     (yyval.tree) = blockItem;
 }
-#line 1985 "syntax.tab.c"
+#line 1986 "syntax.tab.c"
     break;
 
   case 58: /* BlockItem: Stmt  */
-#line 506 "syntax.y"
+#line 507 "syntax.y"
        {
     auto blockItem = new BlockItem();
     blockItem->blockItemType = BlockItemType::Stmt;
     blockItem->stmt = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = blockItem;
 }
-#line 1996 "syntax.tab.c"
+#line 1997 "syntax.tab.c"
     break;
 
   case 59: /* Stmt: LVal '=' Exp ';'  */
-#line 514 "syntax.y"
+#line 515 "syntax.y"
                    {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Assign;
@@ -2004,43 +2005,43 @@ yyreduce:
     stmt->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = stmt;
 }
-#line 2008 "syntax.tab.c"
+#line 2009 "syntax.tab.c"
     break;
 
   case 60: /* Stmt: ';'  */
-#line 521 "syntax.y"
+#line 522 "syntax.y"
       {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Empty;
     (yyval.tree) = stmt;
 }
-#line 2018 "syntax.tab.c"
+#line 2019 "syntax.tab.c"
     break;
 
   case 61: /* Stmt: Exp ';'  */
-#line 526 "syntax.y"
+#line 527 "syntax.y"
           {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Exp;
     stmt->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = stmt;
 }
-#line 2029 "syntax.tab.c"
+#line 2030 "syntax.tab.c"
     break;
 
   case 62: /* Stmt: Block  */
-#line 532 "syntax.y"
+#line 533 "syntax.y"
         {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Block;
     stmt->block = shared_ptr<Block>((Block* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 2040 "syntax.tab.c"
+#line 2041 "syntax.tab.c"
     break;
 
   case 63: /* Stmt: IF LPAREN Cond RPAREN Stmt  */
-#line 538 "syntax.y"
+#line 539 "syntax.y"
                              {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::If;
@@ -2048,11 +2049,11 @@ yyreduce:
     stmt->stmt_if = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 2052 "syntax.tab.c"
+#line 2053 "syntax.tab.c"
     break;
 
   case 64: /* Stmt: IF LPAREN Cond RPAREN Stmt ELSE Stmt  */
-#line 545 "syntax.y"
+#line 546 "syntax.y"
                                        {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::IfElse;
@@ -2061,11 +2062,11 @@ yyreduce:
     stmt->stmt_if_else = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 2065 "syntax.tab.c"
+#line 2066 "syntax.tab.c"
     break;
 
   case 65: /* Stmt: WHILE LPAREN Cond RPAREN Stmt  */
-#line 553 "syntax.y"
+#line 554 "syntax.y"
                                 {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::While;
@@ -2073,94 +2074,94 @@ yyreduce:
     stmt->stmt_while = shared_ptr<Stmt>((Stmt* )(yyvsp[0].tree));
     (yyval.tree) = stmt;
 }
-#line 2077 "syntax.tab.c"
+#line 2078 "syntax.tab.c"
     break;
 
   case 66: /* Stmt: BREAK ';'  */
-#line 560 "syntax.y"
+#line 561 "syntax.y"
             {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Break;
     (yyval.tree) = stmt;
 }
-#line 2087 "syntax.tab.c"
+#line 2088 "syntax.tab.c"
     break;
 
   case 67: /* Stmt: CONTINUE ';'  */
-#line 565 "syntax.y"
+#line 566 "syntax.y"
                {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Continue;
     (yyval.tree) = stmt;
 }
-#line 2097 "syntax.tab.c"
+#line 2098 "syntax.tab.c"
     break;
 
   case 68: /* Stmt: RETURN ';'  */
-#line 570 "syntax.y"
+#line 571 "syntax.y"
              {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::Return;
     (yyval.tree) = stmt;
 }
-#line 2107 "syntax.tab.c"
+#line 2108 "syntax.tab.c"
     break;
 
   case 69: /* Stmt: RETURN Exp ';'  */
-#line 575 "syntax.y"
+#line 576 "syntax.y"
                  {
     auto stmt = new Stmt();
     stmt->stmtType = StmtType::ReturnExp;
     stmt->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = stmt;
 }
-#line 2118 "syntax.tab.c"
+#line 2119 "syntax.tab.c"
     break;
 
   case 70: /* ConstExp: Exp  */
-#line 583 "syntax.y"
+#line 584 "syntax.y"
       {
     auto constExp = new ConstExp();
     constExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = constExp;
 }
-#line 2128 "syntax.tab.c"
+#line 2129 "syntax.tab.c"
     break;
 
   case 71: /* Exp: AddExp  */
-#line 590 "syntax.y"
+#line 591 "syntax.y"
          {
     auto exp = new Exp();
     exp->add_exp = shared_ptr<AddExp>((AddExp* )(yyvsp[0].tree));
     exp->is_const = exp->add_exp->is_const;
     (yyval.tree) = exp;
 }
-#line 2139 "syntax.tab.c"
+#line 2140 "syntax.tab.c"
     break;
 
   case 72: /* Cond: LOrExp  */
-#line 598 "syntax.y"
+#line 599 "syntax.y"
          {
     auto cond = new Cond();
     cond->lOrExp = shared_ptr<LOrExp>((LOrExp* )(yyvsp[0].tree));
     (yyval.tree) = cond;
 }
-#line 2149 "syntax.tab.c"
+#line 2150 "syntax.tab.c"
     break;
 
   case 73: /* LVal: IDENT  */
-#line 605 "syntax.y"
+#line 606 "syntax.y"
         {
     auto lVal = new LVal();
     lVal->varKind = VarKind::Var;
     lVal->ident = *((yyvsp[0].sval));
     (yyval.tree) = lVal;
 }
-#line 2160 "syntax.tab.c"
+#line 2161 "syntax.tab.c"
     break;
 
   case 74: /* LVal: IDENT ArrayIndex  */
-#line 611 "syntax.y"
+#line 612 "syntax.y"
                    {
     auto lVal = new LVal();
     lVal->varKind = VarKind::Array;
@@ -2168,77 +2169,77 @@ yyreduce:
     lVal->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = lVal;
 }
-#line 2172 "syntax.tab.c"
+#line 2173 "syntax.tab.c"
     break;
 
   case 75: /* PrimaryExp: LPAREN Exp RPAREN  */
-#line 620 "syntax.y"
+#line 621 "syntax.y"
                     {
     auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::Exp;
     primaryExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[-1].tree));
     (yyval.tree) = primaryExp;
 }
-#line 2183 "syntax.tab.c"
+#line 2184 "syntax.tab.c"
     break;
 
   case 76: /* PrimaryExp: LVal  */
-#line 626 "syntax.y"
+#line 627 "syntax.y"
        {
     auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::LVal;
     primaryExp->lVal = shared_ptr<LVal>((LVal* )(yyvsp[0].tree));
     (yyval.tree) = primaryExp;
 }
-#line 2194 "syntax.tab.c"
+#line 2195 "syntax.tab.c"
     break;
 
   case 77: /* PrimaryExp: INTCONST  */
-#line 632 "syntax.y"
+#line 633 "syntax.y"
            {
     auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::Number;
     primaryExp->number = (yyvsp[0].ival);
     (yyval.tree) = primaryExp;
 }
-#line 2205 "syntax.tab.c"
+#line 2206 "syntax.tab.c"
     break;
 
   case 78: /* PrimaryExp: STRING  */
-#line 638 "syntax.y"
+#line 639 "syntax.y"
          {
     auto primaryExp = new PrimaryExp();
     primaryExp->primaryExpType = PrimaryExpType::String;
     primaryExp->str = *((yyvsp[0].sval));
     (yyval.tree) = primaryExp;
 }
-#line 2216 "syntax.tab.c"
+#line 2217 "syntax.tab.c"
     break;
 
   case 79: /* UnaryExp: PrimaryExp  */
-#line 646 "syntax.y"
+#line 647 "syntax.y"
              {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::PrimaryExp;
     unaryExp->primary_exp = shared_ptr<PrimaryExp>((PrimaryExp* )(yyvsp[0].tree));
     (yyval.tree) = unaryExp;
 }
-#line 2227 "syntax.tab.c"
+#line 2228 "syntax.tab.c"
     break;
 
   case 80: /* UnaryExp: IDENT LPAREN RPAREN  */
-#line 652 "syntax.y"
+#line 653 "syntax.y"
                       {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::FuncCall;
     unaryExp->func_ident = *((yyvsp[-2].sval));
     (yyval.tree) = unaryExp;
 }
-#line 2238 "syntax.tab.c"
+#line 2239 "syntax.tab.c"
     break;
 
   case 81: /* UnaryExp: IDENT LPAREN FuncRParamList RPAREN  */
-#line 658 "syntax.y"
+#line 659 "syntax.y"
                                      {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::FuncCall;
@@ -2246,11 +2247,11 @@ yyreduce:
     unaryExp->funcRParamList = shared_ptr<FuncRParamList>((FuncRParamList* )(yyvsp[-1].tree));
     (yyval.tree) = unaryExp;
 }
-#line 2250 "syntax.tab.c"
+#line 2251 "syntax.tab.c"
     break;
 
   case 82: /* UnaryExp: UnaryOp UnaryExp  */
-#line 665 "syntax.y"
+#line 666 "syntax.y"
                    {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::OP_Exp;
@@ -2258,11 +2259,11 @@ yyreduce:
     unaryExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = unaryExp;
 }
-#line 2262 "syntax.tab.c"
+#line 2263 "syntax.tab.c"
     break;
 
   case 83: /* UnaryExp: '&' IDENT  */
-#line 672 "syntax.y"
+#line 673 "syntax.y"
             {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::OP_Exp;
@@ -2270,11 +2271,11 @@ yyreduce:
     unaryExp->ident = *((yyvsp[0].sval));
     (yyval.tree) = unaryExp;
 }
-#line 2274 "syntax.tab.c"
+#line 2275 "syntax.tab.c"
     break;
 
   case 84: /* UnaryExp: '&' IDENT ArrayIndex  */
-#line 679 "syntax.y"
+#line 680 "syntax.y"
                        {
     auto unaryExp = new UnaryExp();
     unaryExp->unaryExpType = UnaryExpType::OP_Exp;
@@ -2284,46 +2285,46 @@ yyreduce:
     unaryExp->arrayIndex = shared_ptr<ArrayIndex>((ArrayIndex* )(yyvsp[0].tree));
     (yyval.tree) = unaryExp;
 }
-#line 2288 "syntax.tab.c"
+#line 2289 "syntax.tab.c"
     break;
 
   case 85: /* UnaryOp: '+'  */
-#line 690 "syntax.y"
+#line 691 "syntax.y"
       {
     (yyval.chval) = '+';
 }
-#line 2296 "syntax.tab.c"
+#line 2297 "syntax.tab.c"
     break;
 
   case 86: /* UnaryOp: MINUS  */
-#line 693 "syntax.y"
+#line 694 "syntax.y"
         {
     (yyval.chval) = '-';
 }
-#line 2304 "syntax.tab.c"
+#line 2305 "syntax.tab.c"
     break;
 
   case 87: /* UnaryOp: '!'  */
-#line 696 "syntax.y"
+#line 697 "syntax.y"
       {
     (yyval.chval) = '!';
 }
-#line 2312 "syntax.tab.c"
+#line 2313 "syntax.tab.c"
     break;
 
   case 88: /* FuncRParamList: Exp  */
-#line 701 "syntax.y"
+#line 702 "syntax.y"
       {
     auto funcRParamList = new FuncRParamList();
     funcRParamList->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     funcRParamList->exps.push_back(funcRParamList->exp);
     (yyval.tree) = funcRParamList;
 }
-#line 2323 "syntax.tab.c"
+#line 2324 "syntax.tab.c"
     break;
 
   case 89: /* FuncRParamList: FuncRParamList ',' Exp  */
-#line 707 "syntax.y"
+#line 708 "syntax.y"
                          {
     auto funcRParamList = new FuncRParamList();
     funcRParamList->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
@@ -2332,22 +2333,22 @@ yyreduce:
     funcRParamList->exps.push_back(funcRParamList->exp);
     (yyval.tree) = funcRParamList;
 }
-#line 2336 "syntax.tab.c"
+#line 2337 "syntax.tab.c"
     break;
 
   case 90: /* MulExp: UnaryExp  */
-#line 717 "syntax.y"
+#line 718 "syntax.y"
            {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::UnaryExp;
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2347 "syntax.tab.c"
+#line 2348 "syntax.tab.c"
     break;
 
   case 91: /* MulExp: MulExp '*' UnaryExp  */
-#line 723 "syntax.y"
+#line 724 "syntax.y"
                       {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
@@ -2356,11 +2357,11 @@ yyreduce:
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2360 "syntax.tab.c"
+#line 2361 "syntax.tab.c"
     break;
 
   case 92: /* MulExp: MulExp '/' UnaryExp  */
-#line 731 "syntax.y"
+#line 732 "syntax.y"
                       {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
@@ -2369,11 +2370,11 @@ yyreduce:
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2373 "syntax.tab.c"
+#line 2374 "syntax.tab.c"
     break;
 
   case 93: /* MulExp: MulExp '%' UnaryExp  */
-#line 739 "syntax.y"
+#line 740 "syntax.y"
                       {
     auto mulExp = new MulExp();
     mulExp->mulExpType = MulExpType::MulUnaryExp;
@@ -2382,22 +2383,22 @@ yyreduce:
     mulExp->unary_exp = shared_ptr<UnaryExp>((UnaryExp* )(yyvsp[0].tree));
     (yyval.tree) = mulExp;
 }
-#line 2386 "syntax.tab.c"
+#line 2387 "syntax.tab.c"
     break;
 
   case 94: /* AddExp: MulExp  */
-#line 749 "syntax.y"
+#line 750 "syntax.y"
          {
     auto addExp = new AddExp();
     addExp->addExpType = AddExpType::MulExp;
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )(yyvsp[0].tree));
     (yyval.tree) = addExp;
 }
-#line 2397 "syntax.tab.c"
+#line 2398 "syntax.tab.c"
     break;
 
   case 95: /* AddExp: AddExp '+' MulExp  */
-#line 755 "syntax.y"
+#line 756 "syntax.y"
                     {
     auto addExp = new AddExp();
     addExp->addExpType = AddExpType::AddMulExp;
@@ -2406,11 +2407,11 @@ yyreduce:
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )(yyvsp[0].tree));
     (yyval.tree) = addExp;
 }
-#line 2410 "syntax.tab.c"
+#line 2411 "syntax.tab.c"
     break;
 
   case 96: /* AddExp: AddExp MINUS MulExp  */
-#line 763 "syntax.y"
+#line 764 "syntax.y"
                       {
     auto addExp = new AddExp();
     addExp->addExpType = AddExpType::AddMulExp;
@@ -2419,11 +2420,11 @@ yyreduce:
     addExp->mul_exp = shared_ptr<MulExp>((MulExp* )(yyvsp[0].tree));
     (yyval.tree) = addExp;
 }
-#line 2423 "syntax.tab.c"
+#line 2424 "syntax.tab.c"
     break;
 
   case 97: /* RelExp: Exp  */
-#line 773 "syntax.y"
+#line 774 "syntax.y"
       {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::Exp;
@@ -2433,11 +2434,11 @@ yyreduce:
 
     (yyval.tree) = relExp;
 }
-#line 2437 "syntax.tab.c"
+#line 2438 "syntax.tab.c"
     break;
 
   case 98: /* RelExp: RelExp '<' Exp  */
-#line 782 "syntax.y"
+#line 783 "syntax.y"
                  {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelExp;
@@ -2446,11 +2447,11 @@ yyreduce:
     relExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2450 "syntax.tab.c"
+#line 2451 "syntax.tab.c"
     break;
 
   case 99: /* RelExp: RelExp '<' error  */
-#line 790 "syntax.y"
+#line 791 "syntax.y"
                    {
     fprintf(stderr, "Error: Unknown operator\n");
     auto relExp = new RelExp();
@@ -2461,11 +2462,11 @@ yyreduce:
     (yyval.tree) = relExp;
 
 }
-#line 2465 "syntax.tab.c"
+#line 2466 "syntax.tab.c"
     break;
 
   case 100: /* RelExp: RelExp '>' Exp  */
-#line 800 "syntax.y"
+#line 801 "syntax.y"
                  {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelExp;
@@ -2474,11 +2475,11 @@ yyreduce:
     relExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2478 "syntax.tab.c"
+#line 2479 "syntax.tab.c"
     break;
 
   case 101: /* RelExp: RelExp LE Exp  */
-#line 808 "syntax.y"
+#line 809 "syntax.y"
                 {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelExp;
@@ -2487,11 +2488,11 @@ yyreduce:
     relExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2491 "syntax.tab.c"
+#line 2492 "syntax.tab.c"
     break;
 
   case 102: /* RelExp: RelExp GE Exp  */
-#line 816 "syntax.y"
+#line 817 "syntax.y"
                 {
     auto relExp = new RelExp();
     relExp->relExpType = RelExpType::RelExp;
@@ -2500,11 +2501,11 @@ yyreduce:
     relExp->exp = shared_ptr<Exp>((Exp* )(yyvsp[0].tree));
     (yyval.tree) = relExp;
 }
-#line 2504 "syntax.tab.c"
+#line 2505 "syntax.tab.c"
     break;
 
   case 103: /* EqExp: RelExp  */
-#line 826 "syntax.y"
+#line 827 "syntax.y"
          {
     auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::RelExp;
@@ -2514,11 +2515,11 @@ yyreduce:
 
     (yyval.tree) = eqExp;
 }
-#line 2518 "syntax.tab.c"
+#line 2519 "syntax.tab.c"
     break;
 
   case 104: /* EqExp: EqExp EQ RelExp  */
-#line 835 "syntax.y"
+#line 836 "syntax.y"
                   {
     auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::EqRelExp;
@@ -2530,11 +2531,11 @@ yyreduce:
 
     (yyval.tree) = eqExp;
 }
-#line 2534 "syntax.tab.c"
+#line 2535 "syntax.tab.c"
     break;
 
   case 105: /* EqExp: EqExp NE RelExp  */
-#line 846 "syntax.y"
+#line 847 "syntax.y"
                   {
     auto eqExp = new EqExp();
     eqExp->eqExpType = EqExpType::EqRelExp;
@@ -2545,22 +2546,22 @@ yyreduce:
     eqExp->is_rel_exp = eqExp->relExp->is_exp;
     (yyval.tree) = eqExp;
 }
-#line 2549 "syntax.tab.c"
+#line 2550 "syntax.tab.c"
     break;
 
   case 106: /* LAndExp: EqExp  */
-#line 858 "syntax.y"
+#line 859 "syntax.y"
         {
     auto lAndExp = new LAndExp();
     lAndExp->lAndExpType = LAndExpType::EqExp;
     lAndExp->eqExp = shared_ptr<EqExp>((EqExp* )(yyvsp[0].tree));
     (yyval.tree) = lAndExp;
 }
-#line 2560 "syntax.tab.c"
+#line 2561 "syntax.tab.c"
     break;
 
   case 107: /* LAndExp: LAndExp LAND EqExp  */
-#line 864 "syntax.y"
+#line 865 "syntax.y"
                      {
     auto lAndExp = new LAndExp();
     lAndExp->lAndExpType = LAndExpType::LAndEqExp;
@@ -2568,22 +2569,22 @@ yyreduce:
     lAndExp->eqExp = shared_ptr<EqExp>((EqExp* )(yyvsp[0].tree));
     (yyval.tree) = lAndExp;
 }
-#line 2572 "syntax.tab.c"
+#line 2573 "syntax.tab.c"
     break;
 
   case 108: /* LOrExp: LAndExp  */
-#line 873 "syntax.y"
+#line 874 "syntax.y"
           {
     auto lOrExp = new LOrExp();
     lOrExp->lOrExpType = LOrExpType::LAndExp;
     lOrExp->lAndExp = shared_ptr<LAndExp>((LAndExp* )(yyvsp[0].tree));
     (yyval.tree) = lOrExp;
 }
-#line 2583 "syntax.tab.c"
+#line 2584 "syntax.tab.c"
     break;
 
   case 109: /* LOrExp: LOrExp LOR LAndExp  */
-#line 879 "syntax.y"
+#line 880 "syntax.y"
                      {
     auto lOrExp = new LOrExp();
     lOrExp->lOrExpType = LOrExpType::LOrLAndExp;
@@ -2591,19 +2592,19 @@ yyreduce:
     lOrExp->lAndExp = shared_ptr<LAndExp>((LAndExp* )(yyvsp[0].tree));
     (yyval.tree) = lOrExp;
 }
-#line 2595 "syntax.tab.c"
+#line 2596 "syntax.tab.c"
     break;
 
   case 110: /* INCLUDE_STMT: INCLUDE FILE_NAME  */
-#line 888 "syntax.y"
+#line 889 "syntax.y"
                     {
     //fprintf(stderr, "Error: Include statement is not supported\n");
 }
-#line 2603 "syntax.tab.c"
+#line 2604 "syntax.tab.c"
     break;
 
 
-#line 2607 "syntax.tab.c"
+#line 2608 "syntax.tab.c"
 
       default: break;
     }
@@ -2796,17 +2797,28 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 892 "syntax.y"
+#line 893 "syntax.y"
 
 
 void yyerror(const char *s) {
     fprintf(stderr, "%s\n", s);
 }
 
-int main()
+int main(int argc, const char *argv[])
 {
-    freopen("input.c", "r", stdin);
-    freopen("output.dot", "w", stdout);
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <output_file> <input_file>\n", argv[0]);
+        return 1;
+    }
+
+    string input_file = argv[2];
+    file_name = argv[1];
+
+    std::cerr << "input file: " << input_file << std::endl;
+    std::cerr << "output file: " << file_name << std::endl;
+    
+    freopen(argv[2], "r", stdin);
+    freopen("AST.dot", "w", stdout);
     yyparse();
     fclose(stdin);
     fclose(stdout);

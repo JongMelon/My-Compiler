@@ -47,7 +47,7 @@ extern int yydebug;
 /* "%code requires" blocks.  */
 #line 1 "syntax.y"
 
-    #include "Trans.h"
+    #include "ASM.h"
 
 #line 53 "syntax.tab.h"
 
@@ -95,7 +95,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 19 "syntax.y"
+#line 20 "syntax.y"
 
     int ival;
     char chval;
